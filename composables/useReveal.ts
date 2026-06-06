@@ -5,15 +5,32 @@
 export function useReveal() {
   if (import.meta.server) return
 
-  onMounted(() => {
-    const elements = document.querySelectorAll<HTMLElement>('.reveal-on-scroll')
+  const route = useRoute()
+  let observer: IntersectionObserver | null = null
 
-    const observer = new IntersectionObserver(
+  const revealVisibleElements = () => {
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight
+    const elements = document.querySelectorAll<HTMLElement>('.reveal-on-scroll:not(.is-visible)')
+
+    elements.forEach((element) => {
+      const rect = element.getBoundingClientRect()
+
+      if (rect.top < viewportHeight - 48 && rect.bottom > 0) {
+        element.classList.add('is-visible')
+        observer?.unobserve(element)
+      }
+    })
+  }
+
+  const observeElements = () => {
+    observer?.disconnect()
+
+    observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add('is-visible')
-            observer.unobserve(entry.target)
+            observer?.unobserve(entry.target)
           }
         })
       },
@@ -23,8 +40,31 @@ export function useReveal() {
       },
     )
 
-    elements.forEach((el) => observer.observe(el))
+    const elements = document.querySelectorAll<HTMLElement>('.reveal-on-scroll:not(.is-visible)')
 
-    onUnmounted(() => observer.disconnect())
+    elements.forEach((element) => observer?.observe(element))
+    revealVisibleElements()
+  }
+
+  const refreshReveal = () => {
+    requestAnimationFrame(() => {
+      observeElements()
+    })
+  }
+
+  onMounted(() => {
+    refreshReveal()
+  })
+
+  watch(
+    () => route.fullPath,
+    async () => {
+      await nextTick()
+      refreshReveal()
+    },
+  )
+
+  onUnmounted(() => {
+    observer?.disconnect()
   })
 }
