@@ -220,12 +220,12 @@ const oneShotFeatures = [
 ]
 
 const subscriptionFeatures = [
-  'Horoscope quotidien avance et plus detaille',
+  'Chaque matin, ce que le ciel te réserve, avant que ta journée commence',
   'Historique et tendances sur plusieurs jours',
-  'Transits du moment et fenetres favorables',
+  'Sais quand agir, quand attendre, quand lancer grâce à tes cycles personnels',
   'Rapport mensuel et alertes importantes',
   'Priorite sur les nouvelles fonctions premium',
-  'Pensé pour la retention, pas juste un document',
+  'Transits majeurs et influence des planètes lentes pour mieux comprendre les grands cycles de ta vie',
 ]
 
 const trustBadges = [
