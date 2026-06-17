@@ -157,7 +157,7 @@
           </a>
         </div>
 
-        <p class="mt-4 text-center text-xs text-slate-500">Le plan annuel est le plus rentable si vous voulez suivre vos cycles sur la duree.</p>
+        <p class="mt-4 text-center text-xs text-slate-500">Le plan annuel est le plus avantageux si vous voulez suivre vos cycles sur la durée.</p>
       </div>
     </div>
 
@@ -189,7 +189,7 @@ const premiumDescription = computed(() =>
     : 'Le suivi vivant en formule annuelle: meme experience premium, tarif optimise'
 )
 const premiumCtaLabel = computed(() =>
-  premiumBilling.value === 'monthly' ? 'Passer au premium mensuel' : 'Passer au premium annuel'
+  premiumBilling.value === 'monthly' ? 'Activer mon suivi astral mensuel' : 'Activer mon suivi astral annuel'
 )
 const activeSubscriptionLink = computed(() =>
   premiumBilling.value === 'monthly' ? subscriptionMonthlyLink : subscriptionYearlyLink

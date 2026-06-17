@@ -63,7 +63,7 @@
         </NuxtLink>
 
         <NuxtLink
-          to="/#pricing"
+          to="/rapport"
           class="hidden items-center gap-2 rounded-full bg-[linear-gradient(135deg,#7c3aed,#a855f7_50%,#f59e0b)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_0_20px_rgba(124,58,237,0.4)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_30px_rgba(124,58,237,0.6)] sm:inline-flex"
         >
           <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -118,7 +118,7 @@
             {{ isAuthenticated ? `Mon compte (${accountLabel})` : 'Mon compte' }}
           </NuxtLink>
           <NuxtLink
-            to="/#pricing"
+            to="/rapport"
             class="inline-flex justify-center rounded-full bg-[linear-gradient(135deg,#7c3aed,#a855f7_50%,#f59e0b)] px-5 py-3 text-sm font-semibold text-white shadow-[0_0_20px_rgba(124,58,237,0.4)] transition-all duration-300"
             @click="menuOpen = false"
           >
@@ -148,7 +148,7 @@ const accountLabel = computed(() => {
 
 const navLinks = [
   { href: '/horoscope-du-jour', label: 'Horoscope du jour' },
-  { href: '/#how-it-works', label: 'Comment ca marche' },
+  { href: '/#how-it-works', label: 'Comment ça marche' },
   { href: '/#pricing', label: 'Tarifs' },
   { href: '/blog', label: 'Blog', isNew: true },
 ]

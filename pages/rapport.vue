@@ -4,33 +4,33 @@
       <Transition name="fade-up" mode="out-in">
         <div v-if="step === 0" key="form" class="mx-auto max-w-3xl">
           <header class="mb-8 text-center sm:mb-10">
-            <p class="eyebrow mb-3">Theme natal</p>
+            <p class="eyebrow mb-3">Thème natal</p>
             <h1 class="font-display text-4xl text-white sm:text-6xl">
               Votre <span class="text-amber-300">carte du ciel</span>
             </h1>
             <p class="mx-auto mt-4 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
-              Decouvrez les influences celestes qui guident votre chemin de vie,
-              vos relations et votre potentiel cache.
+              Decouvrez les influences célestes qui guident votre chemin de vie,
+              vos relations et votre potentiel caché.
             </p>
             <div class="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-400 sm:gap-6">
-              <span class="inline-flex items-center gap-2"><span class="text-amber-300">🔒</span> Donnees privees</span>
-              <span class="inline-flex items-center gap-2"><span class="text-amber-300">⚡</span> Resultat en 30s</span>
+              <span class="inline-flex items-center gap-2"><span class="text-amber-300">🔒</span> Données privees</span>
+              <span class="inline-flex items-center gap-2"><span class="text-amber-300">⚡</span> Résultat en 30s</span>
               <span class="inline-flex items-center gap-2"><span class="text-amber-300">✦</span> 100% gratuit</span>
             </div>
           </header>
 
           <div class="glass-panel relative overflow-hidden border border-white/15 p-6 sm:p-8">
             <div class="pointer-events-none absolute -top-20 right-0 h-44 w-44 rounded-full bg-violet-500/20 blur-3xl" />
-            <p class="eyebrow mb-2">Theme natal</p>
+            <p class="eyebrow mb-2">Thème natal</p>
             <h2 class="font-display text-3xl leading-tight text-white sm:text-4xl">Commencer ma lecture astrale</h2>
             <p class="mt-2 text-sm leading-6 text-slate-300">
-              Entrez vos donnees de naissance pour generer votre theme natal personnalise.
+              Entrez vos donnees de naissance pour generer votre theme natal personnalisé.
               L'heure est optionnelle mais permet de calculer votre ascendant.
             </p>
 
             <form class="mt-8 space-y-5" @submit.prevent="calculate">
               <div>
-                <label class="mb-2 block text-xs uppercase tracking-[0.18em] text-slate-400">Prenom</label>
+                <label class="mb-2 block text-xs uppercase tracking-[0.18em] text-slate-400">Prénom</label>
                 <input
                   v-model="form.firstName"
                   type="text"
@@ -38,22 +38,6 @@
                   placeholder="Marie"
                   required
                 />
-              </div>
-
-              <div>
-                <label class="mb-2 block text-xs uppercase tracking-[0.18em] text-slate-400">
-                  Email
-                  <span class="normal-case tracking-normal text-slate-500">(optionnel, recommande)</span>
-                </label>
-                <input
-                  v-model="form.email"
-                  type="email"
-                  class="form-input"
-                  placeholder="marie@email.com"
-                />
-                <p class="mt-1 text-[11px] text-slate-500">
-                  Utilisez la meme adresse lors du paiement pour retrouver vos acces premium sur un autre appareil.
-                </p>
               </div>
 
               <div class="grid gap-4 sm:grid-cols-2">
@@ -81,7 +65,7 @@
                 <input v-model="unknownBirthTime" type="checkbox" class="mt-1 h-4 w-4 rounded border-white/30 bg-transparent text-amber-400" />
                 <span>
                   Je ne connais pas l'heure exacte
-                  <span class="mt-1 block text-xs text-slate-500">L'ascendant ne sera pas calcule - les autres positions restent precises.</span>
+                  <span class="mt-1 block text-xs text-slate-500">L'ascendant ne sera pas calculé - les autres positions restent precises.</span>
                 </span>
               </label>
 
@@ -148,7 +132,12 @@
 
       <Transition name="fade-up" mode="out-in">
         <div v-if="step === 2 && reportStore.reportData" key="report" class="mx-auto max-w-6xl">
-          <ReportDisplay :report="reportStore.reportData" :is-premium="reportStore.isPremium" />
+          <ReportDisplay
+            :report="reportStore.reportData"
+            :is-premium="reportStore.isPremium"
+            :user-email="reportStore.userEmail"
+            @capture-email="handleCaptureEmail"
+          />
         </div>
       </Transition>
     </div>
@@ -180,7 +169,6 @@ const form = reactive({
   birthDate: '',
   birthTime: '',
   gender: 'other',
-  email: '',
   lat: null as number | null,
   lon: null as number | null,
   city: '',
@@ -316,15 +304,10 @@ async function calculate() {
         lon: form.lon,
         city: form.city,
         gender: form.gender,
-        email: form.email,
       },
     })
 
     reportStore.setReportData(res as Record<string, unknown>)
-    if (form.email) {
-      reportStore.setUserEmail(form.email)
-      reportStore.syncPremiumStatusFromServer(form.email)
-    }
     step.value = 2
   } catch (err) {
     console.error(err)
@@ -332,6 +315,48 @@ async function calculate() {
     alert('Une erreur s\'est produite. Veuillez réessayer.')
   } finally {
     calculating.value = false
+  }
+}
+
+async function handleCaptureEmail(email: string) {
+  const normalizedEmail = email.trim().toLowerCase()
+  if (!normalizedEmail) return
+
+  reportStore.setUserEmail(normalizedEmail)
+  await reportStore.syncPremiumStatusFromServer(normalizedEmail)
+
+  const reportId = String(reportStore.reportData?.reportId || '')
+  const reportData = reportStore.reportData || {}
+  const previewPayload = {
+    firstName: String(reportData.firstName || ''),
+    birthDate: String(reportData.birthDate || ''),
+    city: String(reportData.city || ''),
+    sunSign: String(reportData.sunSign || ''),
+    moonSign: String(reportData.moonSign || ''),
+    ascendant: String(reportData.ascendant || ''),
+    summary: String(reportData.summary || ''),
+  }
+
+  if (!reportId) return
+
+  try {
+    const response = await $fetch<{
+      emailSent?: boolean
+      emailFallbackReason?: string | null
+    }>('/api/report/capture-email', {
+      method: 'POST',
+      body: {
+        reportId,
+        email: normalizedEmail,
+        previewPayload,
+      },
+    })
+
+    if (!response?.emailSent) {
+      console.warn('[rapport] preview email fallback:', response?.emailFallbackReason || 'unknown')
+    }
+  } catch (error) {
+    console.error('[rapport] capture-email failed:', error)
   }
 }
 </script>

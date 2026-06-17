@@ -6,7 +6,7 @@
         Le theme de <span class="text-amber-300 uppercase">{{ firstName }}</span>
       </h1>
       <p class="mx-auto mt-4 max-w-3xl text-sm leading-7 text-slate-300 sm:text-base">
-        Decouvrez les influences celestes qui guident votre chemin de vie,
+        Decouvrez les influences célestes qui guident votre chemin de vie,
         vos relations et votre potentiel cache.
       </p>
     </header>
@@ -43,15 +43,88 @@
     </article>
 
     <section class="glass-panel relative overflow-hidden border border-violet-400/20 px-5 py-5 sm:px-8 sm:py-7">
-      <p class="eyebrow mb-2">Resume personnalise</p>
-      <h3 class="font-display text-2xl text-white sm:text-3xl">Votre lecture rapide</h3>
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <p class="eyebrow mb-2">Resumé personnalisé</p>
+          <h3 class="font-display text-2xl text-white sm:text-3xl">Votre lecture rapide</h3>
+        </div>
+        <button
+          v-if="hasLeadEmail"
+          type="button"
+          class="rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition-colors hover:border-white/30 hover:text-white"
+          :disabled="pdfLoading"
+          @click="downloadPreviewPdf"
+        >
+          {{ pdfLoading ? 'Generation...' : 'Recevoir l\'apercu PDF' }}
+        </button>
+      </div>
       <p class="mt-4 text-sm leading-7 text-slate-200 sm:text-[15px]">{{ summaryText }}</p>
     </section>
 
-    <section class="glass-panel overflow-hidden border border-white/15 px-5 py-5 sm:px-8 sm:py-7">
+    <section v-if="!hasLeadEmail" class="glass-panel overflow-hidden border border-white/15 px-5 py-5 sm:px-8 sm:py-7">
       <div class="mb-4 flex items-center justify-between gap-4">
         <div>
-          <p class="eyebrow mb-1">Planetes</p>
+          <p class="eyebrow mb-1">Planètes</p>
+          <h3 class="font-display text-2xl text-white sm:text-3xl">Positions planetaires</h3>
+        </div>
+        <span class="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-slate-300">Apercu gratuit</span>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2 sm:grid-cols-5 sm:gap-3">
+        <div
+          v-for="(planet, index) in publicPreviewPlanets"
+          :key="`${planet.planet}-public-${index}`"
+          class="rounded-xl border border-white/15 bg-white/10 px-3 py-3"
+        >
+          <p class="text-center text-lg text-violet-300">{{ planetEmoji[planet.planet] || '✦' }}</p>
+          <p class="mt-1 text-center text-[10px] uppercase tracking-[0.2em] text-slate-400">{{ planet.planet }}</p>
+          <p class="mt-1 text-center text-xs text-white">{{ planet.sign }}</p>
+          <p class="text-center text-[11px] text-slate-400">{{ elementForSign(planet.sign) }}</p>
+        </div>
+      </div>
+    </section>
+
+    <section
+      v-if="!hasLeadEmail"
+      class="glass-panel relative overflow-hidden border border-amber-400/30 bg-gradient-to-b from-amber-400/10 to-transparent px-5 py-5 sm:px-8 sm:py-7"
+    >
+      <div class="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-amber-300/20 blur-2xl" />
+      <div class="relative">
+        <p class="eyebrow mb-2">Étape suivante</p>
+        <h3 class="font-display text-2xl text-white sm:text-3xl">Recevez votre aperçu et sauvegardez votre theme</h3>
+        <p class="mt-3 max-w-6xl text-sm leading-7 text-slate-200">
+          Entrez votre email pour reçevoir votre rapport en PDF. Retrouver votre lecture plus tard et debloquer 1 planète supplementaire en apercu gratuit.
+        </p>
+
+        <form class="mt-5 space-y-4" @submit.prevent="submitLeadEmail">
+          <div>
+            <label class="mb-2 block text-xs uppercase tracking-[0.18em] text-slate-400">Email</label>
+            <input
+              v-model.trim="leadEmail"
+              type="email"
+              class="form-input"
+              placeholder="marie@email.com"
+              required
+            />
+            <p class="mt-1 text-[11px] text-slate-500">Aucun spam. Desinscription en un clic. Utilisez une seule adresse pour retrouver vos informations et accès premium sur un autre appareil. </p>
+          </div>
+
+          <button
+            type="submit"
+            class="cta-button w-full justify-center sm:w-auto"
+            :disabled="leadSubmitting"
+            :class="leadSubmitting ? 'cursor-not-allowed opacity-60' : ''"
+          >
+            {{ leadSubmitting ? 'Validation...' : 'Recevoir mon aperçu gratuit' }}
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <section v-if="hasLeadEmail" class="glass-panel overflow-hidden border border-white/15 px-5 py-5 sm:px-8 sm:py-7">
+      <div class="mb-4 flex items-center justify-between gap-4">
+        <div>
+          <p class="eyebrow mb-1">Planètes</p>
           <h3 class="font-display text-2xl text-white sm:text-3xl">Positions planetaires</h3>
         </div>
         <span class="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-slate-300">Apercu gratuit</span>
@@ -77,7 +150,7 @@
       </div>
     </section>
 
-    <section class="glass-panel overflow-hidden border border-white/15 px-5 py-5 sm:px-8 sm:py-7">
+    <section v-if="hasLeadEmail" class="glass-panel overflow-hidden border border-white/15 px-5 py-5 sm:px-8 sm:py-7">
       <div class="mb-4 flex items-center justify-between gap-4">
         <div>
           <p class="eyebrow mb-1">Maisons astrologiques</p>
@@ -103,7 +176,7 @@
       </div>
     </section>
 
-    <section class="glass-panel relative overflow-hidden border border-white/15 px-5 py-5 sm:px-8 sm:py-7">
+    <section v-if="hasLeadEmail" class="glass-panel relative overflow-hidden border border-white/15 px-5 py-5 sm:px-8 sm:py-7">
       <div :class="isPremium ? '' : 'blur-[4px] opacity-60 select-none'">
         <p class="eyebrow mb-1">Aspects planetaires</p>
         <h3 class="font-display text-2xl text-white sm:text-3xl">Harmonies et tensions du ciel</h3>
@@ -116,13 +189,13 @@
       </div>
     </section>
 
-    <section class="glass-panel text-center relative overflow-hidden border border-amber-400/30 bg-gradient-to-b from-violet-500/15 to-transparent px-5 py-7 sm:px-8 sm:py-9">
+    <section v-if="hasLeadEmail" class="glass-panel text-center relative overflow-hidden border border-amber-400/30 bg-gradient-to-b from-violet-500/15 to-transparent px-5 py-7 sm:px-8 sm:py-9">
       <p class="mx-auto mb-3 inline-flex rounded-full border border-amber-400/35 bg-amber-400/10 px-4 py-1 text-xs uppercase tracking-[0.2em] text-amber-300">
         ✦ Rapport complet premium ✦
       </p>
       <h3 class="text-center font-display text-3xl text-white sm:text-3xl">Debloquez l'integralite de votre theme natal</h3>
       <p class="mx-auto mt-4 max-w-3xl text-center text-sm leading-7 text-slate-200 sm:text-base">
-        Accedez aux 10 planetes, aux 12 maisons, aux aspects planetaires, aux transits et a la compatibilite amoureuse.
+        Accedez aux 10 planètes, aux 12 maisons, aux aspects planetaires, aux transits et a la compatibilité amoureuse.
       </p>
 
       <div class="mx-auto mt-6 grid max-w-4xl grid-cols-2 gap-3 sm:grid-cols-4">
@@ -146,7 +219,17 @@
       <div class="prose prose-invert mt-5 max-w-none prose-sm" v-html="fullAnalysis" />
     </section>
 
-    <div class="py-2 text-center">
+    <div class="space-y-2 py-2 text-center flex flex-col items-center justify-center gap-3">
+      <button
+        v-if="hasLeadEmail"
+        type="button"
+        class="mx-auto inline-flex items-center gap-2 rounded-full border border-amber-400/35 bg-amber-400/10 px-4 py-2 text-sm font-medium text-amber-200 transition-colors hover:border-amber-300/60 hover:text-amber-100"
+        :disabled="pdfLoading"
+        @click="downloadPreviewPdf"
+      >
+        {{ pdfLoading ? 'Generation...' : 'Recevoir mon rapport PDF' }}
+      </button>
+
       <NuxtLink to="/rapport" class="text-sm text-slate-400 underline underline-offset-4 transition-colors hover:text-white">
         Calculer un autre theme
       </NuxtLink>
@@ -158,6 +241,11 @@
 const props = defineProps<{
   report: Record<string, unknown>
   isPremium: boolean
+  userEmail: string
+}>()
+
+const emit = defineEmits<{
+  (e: 'capture-email', email: string): void
 }>()
 
 const config = useRuntimeConfig()
@@ -177,6 +265,11 @@ const planetEmoji: Record<string, string> = {
 }
 
 const reportData = computed(() => props.report as Record<string, unknown>)
+const hasLeadEmail = computed(() => props.userEmail.trim().length > 0)
+
+const leadEmail = ref('')
+const leadSubmitting = ref(false)
+const pdfLoading = ref(false)
 
 type PlanetEntry = { planet: string; sign: string }
 
@@ -215,7 +308,7 @@ function normalizeSign(sign: string): string {
 function getInsight(sign: string) {
   return signInsight[normalizeSign(sign)] || {
     subtitle: 'Energie astrologique',
-    description: 'Votre configuration celeste met en avant une dynamique singuliere a explorer.',
+    description: 'Votre configuration céleste met en avant une dynamique singuliere a explorer.',
     tags: ['Unique', 'Nuance', 'Evolution'],
     glyph: '✦',
   }
@@ -270,20 +363,22 @@ function isLockedPlanet(index: number): boolean {
   return !props.isPremium && index >= 5
 }
 
+const publicPreviewPlanets = computed(() => planets.value.slice(0, 5))
+
 const houses = computed(() => {
   const asc = String(reportData.value.ascendant || 'votre ascendant')
   return [
-    { index: 1, title: 'Identite', description: `Avec votre ascendant en ${asc}, votre maniere d entrer en relation est marquee par cette energie.`, locked: false },
+    { index: 1, title: 'Identité', description: `Avec votre ascendant en ${asc}, votre maniere d\'entrer en relation est marquée par cette energie.`, locked: false },
     { index: 2, title: 'Valeurs et ressources', description: 'Votre rapport a l argent et a vos talents naturels.', locked: true },
     { index: 3, title: 'Communication', description: 'Votre facon de penser, d apprendre et d echanger.', locked: true },
     { index: 4, title: 'Foyer et racines', description: 'Votre base emotionnelle et vos besoins de securite.', locked: true },
-    { index: 5, title: 'Creativite et amour', description: 'Expression de soi, joie et elan du coeur.', locked: true },
-    { index: 6, title: 'Sante et travail', description: 'Organisation, habitudes et sens du service.', locked: true },
+    { index: 5, title: 'Creativité et amour', description: 'Expression de soi, joie et elan du coeur.', locked: true },
+    { index: 6, title: 'Santé et travail', description: 'Organisation, habitudes et sens du service.', locked: true },
     { index: 7, title: 'Partenariats', description: 'Dynamique de couple et collaborations majeures.', locked: true },
     { index: 8, title: 'Transformations', description: 'Mues profondes, pouvoir personnel et intimite.', locked: true },
     { index: 9, title: 'Vision et philosophie', description: 'Croyances, etudes et ouverture au monde.', locked: true },
-    { index: 10, title: 'Carriere et mission', description: 'Direction de vie et realisation publique.', locked: true },
-    { index: 11, title: 'Amities et projets', description: 'Reseaux et ideal collectif.', locked: true },
+    { index: 10, title: 'Carrière et mission', description: 'Direction de vie et realisation publique.', locked: true },
+    { index: 11, title: 'Amitiés et projets', description: 'Reseaux et ideal collectif.', locked: true },
     { index: 12, title: 'Inconscient', description: 'Monde interieur, intuition et retrait.', locked: true },
   ]
 })
@@ -294,9 +389,68 @@ function toRoman(num: number): string {
 }
 
 const premiumFeatures = [
-  { icon: '🪐', title: '10 planetes', subtitle: 'Uranus, Neptune, Pluton et plus' },
+  { icon: '🪐', title: '10 planètes', subtitle: 'Uranus, Neptune, Pluton et plus' },
   { icon: '🏠', title: '12 maisons', subtitle: 'Chaque domaine de votre vie' },
-  { icon: '⚡', title: 'Aspects', subtitle: 'Tensions et harmonies celestes' },
-  { icon: '💕', title: 'Compatibilite', subtitle: 'Affinites amoureuses par signe' },
+  { icon: '⚡', title: 'Aspects', subtitle: 'Tensions et harmonies célestes' },
+  { icon: '💕', title: 'Compatibilité', subtitle: 'Affinites amoureuses par signe' },
 ]
+
+watch(
+  () => props.userEmail,
+  (email) => {
+    if (email?.trim()) {
+      leadEmail.value = email.trim()
+      leadSubmitting.value = false
+    }
+  },
+  { immediate: true },
+)
+
+function submitLeadEmail() {
+  const normalized = leadEmail.value.trim().toLowerCase()
+  if (!normalized) return
+
+  leadSubmitting.value = true
+  emit('capture-email', normalized)
+}
+
+async function downloadPreviewPdf() {
+  if (pdfLoading.value) return
+  pdfLoading.value = true
+
+  try {
+    const response = await fetch('/api/report/preview-pdf', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        firstName: firstName.value,
+        birthDate: String(reportData.value.birthDate || ''),
+        city: String(reportData.value.city || ''),
+        sunSign: String(reportData.value.sunSign || ''),
+        moonSign: String(reportData.value.moonSign || ''),
+        ascendant: String(reportData.value.ascendant || ''),
+        summary: summaryText.value,
+      }),
+    })
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`)
+    }
+
+    const blob = await response.blob()
+    const url = window.URL.createObjectURL(blob)
+    const anchor = document.createElement('a')
+    anchor.href = url
+    anchor.download = `apercu-theme-${firstName.value || 'stellara'}.pdf`
+    document.body.appendChild(anchor)
+    anchor.click()
+    document.body.removeChild(anchor)
+    window.URL.revokeObjectURL(url)
+  } catch (error) {
+    console.error('[report] preview pdf download failed:', error)
+    alert('Impossible de generer le PDF pour le moment.')
+  } finally {
+    pdfLoading.value = false
+  }
+}
 </script>
