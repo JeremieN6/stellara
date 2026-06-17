@@ -2,6 +2,7 @@ import { createHmac, timingSafeEqual } from 'node:crypto'
 import { and, eq } from 'drizzle-orm'
 import { invoices, plans, subscriptions, users } from '../../../db/schema'
 import { getDbOrThrow } from '../../utils/db'
+import { markLeadAsConvertedByEmail } from '../../utils/lead-sequence'
 
 type StripeEvent = {
   type: string
@@ -198,6 +199,8 @@ async function handleCheckoutCompleted(object: Record<string, unknown>) {
   const stripeCustomerId = getString(object.customer)
 
   if (!email) return
+
+  await markLeadAsConvertedByEmail(email.toLowerCase())
 
   const user = await upsertUserByEmail(email.toLowerCase(), {
     stripeCustomerId,

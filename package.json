@@ -17,6 +17,7 @@
     "@nuxtjs/color-mode": "^3.5.2",
     "@pinia/nuxt": "^0.7.0",
     "drizzle-orm": "^0.44.0",
+    "node-cron": "^4.3.0",
     "nodemailer": "^9.0.1",
     "nuxt": "^3.16.2",
     "pinia": "^2.3.1",

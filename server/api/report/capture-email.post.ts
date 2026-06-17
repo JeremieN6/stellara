@@ -3,6 +3,7 @@ import { reports } from '../../../db/schema'
 import { getDbIfConfigured } from '../../utils/db'
 import { buildPreviewPdfBuffer, type PreviewPdfPayload } from '../../utils/report-preview-pdf'
 import { sendPreviewEmail } from '../../utils/mailer'
+import { runLeadSequenceBatch, upsertLeadMagnetContact } from '../../utils/lead-sequence'
 
 interface CaptureEmailRequest {
   reportId?: string
@@ -27,7 +28,34 @@ export default defineEventHandler(async (event) => {
   }
 
   const db = getDbIfConfigured(event)
+
+  let moonSign: string | null = null
+  if (db && reportId) {
+    try {
+      const [reportRow] = await db
+        .select({ moonSign: reports.moonSign })
+        .from(reports)
+        .where(eq(reports.id, reportId))
+        .limit(1)
+      moonSign = reportRow?.moonSign || null
+    } catch (moonSignError) {
+      console.error('[report/capture-email] moon sign lookup failed:', moonSignError)
+    }
+  }
+
   if (!db || !reportId) {
+    try {
+      await upsertLeadMagnetContact({
+        email,
+        firstName: body.previewPayload?.firstName ?? null,
+        moonSign,
+        reportId: reportId || null,
+      })
+      await runLeadSequenceBatch(20)
+    } catch (sequenceError) {
+      console.error('[report/capture-email] lead sequence upsert failed (fallback path):', sequenceError)
+    }
+
     const sendResult = await sendPreviewByEmail(email, body.previewPayload)
     return {
       ok: true,
@@ -43,6 +71,18 @@ export default defineEventHandler(async (event) => {
       .where(eq(reports.id, reportId))
   } catch (error) {
     console.error('[report/capture-email] DB update failed:', error)
+  }
+
+  try {
+    await upsertLeadMagnetContact({
+      email,
+      firstName: body.previewPayload?.firstName ?? null,
+      moonSign,
+      reportId,
+    })
+    await runLeadSequenceBatch(20)
+  } catch (sequenceError) {
+    console.error('[report/capture-email] lead sequence upsert failed:', sequenceError)
   }
 
   const sendResult = await sendPreviewByEmail(email, body.previewPayload)

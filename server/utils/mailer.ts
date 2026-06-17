@@ -26,12 +26,14 @@ function getTransportConfig() {
   const port = Number(config.emailPort || 587)
   const user = String(config.emailUser || '').trim()
   const pass = String(config.emailPass || '').trim()
+  const from = String(config.emailFrom || '').trim()
 
   return {
     host,
     port,
     user,
     pass,
+    from,
     secure: port === 465,
   }
 }
@@ -64,7 +66,7 @@ function getTransporter() {
   return {
     transporter,
     reason: '',
-    fromAddress: cfg.user,
+    fromAddress: cfg.from || cfg.user,
   }
 }
 

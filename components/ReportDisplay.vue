@@ -256,7 +256,11 @@ const emit = defineEmits<{
 }>()
 
 const config = useRuntimeConfig()
-const stripeLink = config.public.stripeOneShotLink || '/#pricing'
+const stripeLink = computed(() => {
+  const directLink = String(config.public.stripeOneShotLink || '').trim()
+  const fallbackLink = String((config.public as Record<string, unknown>).stripeBuyLinkFallback || '').trim()
+  return directLink || fallbackLink || '/#pricing'
+})
 
 const planetEmoji: Record<string, string> = {
   Soleil: '☀',

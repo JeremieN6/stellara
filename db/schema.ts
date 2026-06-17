@@ -98,3 +98,42 @@ export const invoices = pgTable('invoices_js', {
   userIdx: index('invoices_js_user_idx').on(table.userId),
   subscriptionIdx: index('invoices_js_subscription_idx').on(table.subscriptionId),
 }))
+
+export const leadMagnetContacts = pgTable('lead_magnet_contacts', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  email: text('email').notNull(),
+  firstName: text('first_name'),
+  moonSign: text('moon_sign'),
+  reportId: uuid('report_id').references(() => reports.id, { onDelete: 'set null' }),
+  currentStep: integer('current_step').default(0).notNull(),
+  sentEmailsCount: integer('sent_emails_count').default(0).notNull(),
+  converted: boolean('converted').default(false).notNull(),
+  convertedAt: timestamp('converted_at'),
+  isSequenceCompleted: boolean('is_sequence_completed').default(false).notNull(),
+  nextEmailDueAt: timestamp('next_email_due_at').defaultNow().notNull(),
+  lastEmailSentAt: timestamp('last_email_sent_at'),
+  lastError: text('last_error'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => ({
+  emailUnique: uniqueIndex('lead_magnet_contacts_email_unique').on(table.email),
+  nextEmailDueIdx: index('lead_magnet_contacts_next_email_due_idx').on(table.nextEmailDueAt),
+  convertedIdx: index('lead_magnet_contacts_converted_idx').on(table.converted),
+  sequenceCompletedIdx: index('lead_magnet_contacts_sequence_completed_idx').on(table.isSequenceCompleted),
+}))
+
+export const leadMagnetEmailEvents = pgTable('lead_magnet_email_events', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  contactId: uuid('contact_id').notNull().references(() => leadMagnetContacts.id, { onDelete: 'cascade' }),
+  step: integer('step').notNull(),
+  templateKey: text('template_key').notNull(),
+  subject: text('subject').notNull(),
+  status: text('status').notNull(),
+  errorMessage: text('error_message'),
+  sentAt: timestamp('sent_at'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => ({
+  contactStepUnique: uniqueIndex('lead_magnet_email_events_contact_step_unique').on(table.contactId, table.step),
+  contactIdx: index('lead_magnet_email_events_contact_idx').on(table.contactId),
+  statusIdx: index('lead_magnet_email_events_status_idx').on(table.status),
+}))
