@@ -340,17 +340,17 @@ async function handleCaptureEmail(email: string) {
   if (!reportId) return
 
   try {
-    const response = await $fetch<{
-      emailSent?: boolean
-      emailFallbackReason?: string | null
-    }>('/api/report/capture-email', {
+    const response = await $fetch('/api/report/capture-email', {
       method: 'POST',
       body: {
         reportId,
         email: normalizedEmail,
         previewPayload,
       },
-    })
+    }) as {
+      emailSent?: boolean
+      emailFallbackReason?: string | null
+    }
 
     if (!response?.emailSent) {
       console.warn('[rapport] preview email fallback:', response?.emailFallbackReason || 'unknown')

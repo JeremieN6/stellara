@@ -206,6 +206,13 @@
         </div>
       </div>
 
+      <p class="mx-auto mt-6 max-w-3xl text-center text-sm leading-7 text-slate-200 sm:text-base">
+        <span class="font-semibold text-white">{{ firstName }},</span>
+        ce que vous venez de lire n'est que la surface de votre carte du ciel.
+        Vos aspects planétaires revelent les tensions et dons que vous portez depuis la naissance,
+        et vos transits actuels expliquent ce que vous traversez en ce moment précis.
+      </p>
+
       <div class="mt-8 text-center">
         <a :href="stripeLink" class="cta-button w-full max-w-xl justify-center" target="_blank" rel="noopener">
           ✦ Debloquer mon rapport complet - 9,99€ ✦

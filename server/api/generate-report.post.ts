@@ -79,7 +79,8 @@ export default defineEventHandler(async (event) => {
       reportId = inserted[0]?.id ?? null
     } catch (err) {
       // Do not fail the user flow when persistence is unavailable.
-      console.error('[generate-report] DB insert failed:', err)
+      const message = err instanceof Error ? err.message : String(err)
+      console.error('[generate-report] DB insert failed:', message)
     }
   }
 
