@@ -82,9 +82,7 @@
 
         <div class="mt-8">
           <a
-            :href="oneShotBuyLink"
-            target="_blank"
-            rel="noopener"
+            href="/api/stripe/create-checkout-session?productType=rapport_complet"
             class="block w-full rounded-full border border-white/15 bg-white/5 py-3.5 text-center text-sm font-bold uppercase tracking-[0.18em] text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/10"
           >
             Obtenir mon rapport complet
@@ -148,9 +146,7 @@
 
         <div class="mt-8">
           <a
-            :href="activeSubscriptionLink"
-            target="_blank"
-            rel="noopener"
+            :href="activeSubscriptionCheckoutLink"
             class="block w-full rounded-full bg-[linear-gradient(135deg,#7c3aed_0%,#a855f7_50%,#d97706_100%)] py-3.5 text-center text-sm font-bold uppercase tracking-[0.18em] text-white shadow-[0_0_30px_rgba(124,58,237,0.5)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_50px_rgba(124,58,237,0.7)]"
           >
             {{ premiumCtaLabel }}
@@ -174,12 +170,10 @@
 </template>
 
 <script setup lang="ts">
-const config = useRuntimeConfig()
 const premiumBilling = ref<'monthly' | 'yearly'>('monthly')
 
-const oneShotBuyLink = config.public.stripeOneShotLink || 'https://buy.stripe.com/28E8wQ5Pm7uT36qfF9ePi0p'
-const subscriptionMonthlyLink = config.public.stripeSubMonthlyLink || oneShotBuyLink
-const subscriptionYearlyLink = config.public.stripeSubYearlyLink || subscriptionMonthlyLink
+const subscriptionMonthlyLink = '/api/stripe/create-checkout-session?productType=orbite_premium&billingInterval=monthly'
+const subscriptionYearlyLink = '/api/stripe/create-checkout-session?productType=orbite_premium&billingInterval=yearly'
 
 const premiumPriceDisplay = computed(() => (premiumBilling.value === 'monthly' ? '19€' : '149€'))
 const premiumPriceSuffix = computed(() => (premiumBilling.value === 'monthly' ? '/ mois' : '/ an'))
@@ -191,7 +185,7 @@ const premiumDescription = computed(() =>
 const premiumCtaLabel = computed(() =>
   premiumBilling.value === 'monthly' ? 'Activer mon suivi astral mensuel' : 'Activer mon suivi astral annuel'
 )
-const activeSubscriptionLink = computed(() =>
+const activeSubscriptionCheckoutLink = computed(() =>
   premiumBilling.value === 'monthly' ? subscriptionMonthlyLink : subscriptionYearlyLink
 )
 

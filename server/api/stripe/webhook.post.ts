@@ -3,6 +3,7 @@ import { and, eq } from 'drizzle-orm'
 import { invoices, plans, subscriptions, users } from '../../../db/schema'
 import { getDbOrThrow } from '../../utils/db'
 import { markLeadAsConvertedByEmail } from '../../utils/lead-sequence'
+import { createAffiliateSaleFromCheckout } from '../../utils/affiliate'
 
 type StripeEvent = {
   type: string
@@ -207,6 +208,21 @@ async function handleCheckoutCompleted(object: Record<string, unknown>) {
   })
 
   const stripeSubscriptionId = getString(object.subscription)
+  const stripeSessionId = getString(object.id)
+  const amountTotal = Number.isFinite(Number(object.amount_total)) ? Number(object.amount_total) : 0
+  const metadata = (object.metadata as Record<string, unknown> | undefined) || {}
+  const affiliateId = getString(metadata.affiliateId)
+  const productType = getString(metadata.productType) || 'rapport_complet'
+
+  if (affiliateId && stripeSessionId && amountTotal > 0) {
+    await createAffiliateSaleFromCheckout({
+      affiliateId,
+      stripeSessionId,
+      amountCents: amountTotal,
+      productType,
+    })
+  }
+
   if (!user || !stripeSubscriptionId) return
 
   const status = getString(object.status) || 'active'

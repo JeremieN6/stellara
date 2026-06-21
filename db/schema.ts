@@ -137,3 +137,46 @@ export const leadMagnetEmailEvents = pgTable('lead_magnet_email_events', {
   contactIdx: index('lead_magnet_email_events_contact_idx').on(table.contactId),
   statusIdx: index('lead_magnet_email_events_status_idx').on(table.status),
 }))
+
+export const affiliates = pgTable('affiliates', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  slug: text('slug').notNull(),
+  name: text('name').notNull(),
+  email: text('email').notNull(),
+  promoCode: text('promo_code').notNull(),
+  stripeCouponId: text('stripe_coupon_id').notNull(),
+  commissionRate: real('commission_rate').default(0.4).notNull(),
+  active: boolean('active').default(true).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => ({
+  slugUnique: uniqueIndex('affiliates_slug_unique').on(table.slug),
+  promoCodeUnique: uniqueIndex('affiliates_promo_code_unique').on(table.promoCode),
+  emailIdx: index('affiliates_email_idx').on(table.email),
+  activeIdx: index('affiliates_active_idx').on(table.active),
+}))
+
+export const affiliateClicks = pgTable('affiliate_clicks', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  affiliateId: uuid('affiliate_id').notNull().references(() => affiliates.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  referrer: text('referrer'),
+}, (table) => ({
+  affiliateIdx: index('affiliate_clicks_affiliate_idx').on(table.affiliateId),
+  createdAtIdx: index('affiliate_clicks_created_at_idx').on(table.createdAt),
+}))
+
+export const affiliateSales = pgTable('affiliate_sales', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  affiliateId: uuid('affiliate_id').notNull().references(() => affiliates.id, { onDelete: 'cascade' }),
+  stripeSessionId: text('stripe_session_id').notNull(),
+  amountCents: integer('amount_cents').notNull(),
+  commissionCents: integer('commission_cents').notNull(),
+  productType: text('product_type').notNull(),
+  status: text('status').default('confirmed').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => ({
+  stripeSessionUnique: uniqueIndex('affiliate_sales_stripe_session_unique').on(table.stripeSessionId),
+  affiliateIdx: index('affiliate_sales_affiliate_idx').on(table.affiliateId),
+  statusIdx: index('affiliate_sales_status_idx').on(table.status),
+  createdAtIdx: index('affiliate_sales_created_at_idx').on(table.createdAt),
+}))

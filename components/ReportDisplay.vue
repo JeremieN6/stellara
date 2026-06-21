@@ -257,9 +257,7 @@ const emit = defineEmits<{
 
 const config = useRuntimeConfig()
 const stripeLink = computed(() => {
-  const directLink = String(config.public.stripeOneShotLink || '').trim()
-  const fallbackLink = String((config.public as Record<string, unknown>).stripeBuyLinkFallback || '').trim()
-  return directLink || fallbackLink || '/#pricing'
+  return '/api/stripe/create-checkout-session?productType=rapport_complet'
 })
 
 const planetEmoji: Record<string, string> = {

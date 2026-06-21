@@ -1,0 +1,180 @@
+import { and, count, desc, eq, sql } from 'drizzle-orm'
+import { affiliateClicks, affiliates, affiliateSales } from '../../db/schema'
+import { getDbOrThrow } from './db'
+
+export const AFFILIATE_COOKIE_NAME = 'stellara_ref'
+
+export function normalizeSlug(slug: string): string {
+  return slug
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]/g, '')
+}
+
+export async function findActiveAffiliateBySlug(slug: string) {
+  const db = getDbOrThrow()
+  const normalizedSlug = normalizeSlug(slug)
+  if (!normalizedSlug) return null
+
+  const [affiliate] = await db
+    .select()
+    .from(affiliates)
+    .where(and(eq(affiliates.slug, normalizedSlug), eq(affiliates.active, true)))
+    .limit(1)
+
+  return affiliate || null
+}
+
+export async function trackAffiliateClick(slug: string, referrer?: string | null) {
+  const db = getDbOrThrow()
+  const affiliate = await findActiveAffiliateBySlug(slug)
+  if (!affiliate) return null
+
+  await db.insert(affiliateClicks).values({
+    affiliateId: affiliate.id,
+    referrer: referrer || null,
+  })
+
+  return affiliate
+}
+
+export async function createAffiliateSaleFromCheckout(payload: {
+  affiliateId: string
+  stripeSessionId: string
+  amountCents: number
+  productType: string
+}) {
+  const db = getDbOrThrow()
+  const [affiliate] = await db
+    .select()
+    .from(affiliates)
+    .where(eq(affiliates.id, payload.affiliateId))
+    .limit(1)
+
+  if (!affiliate) return { created: false, reason: 'affiliate_not_found' }
+
+  const commissionCents = Math.round(payload.amountCents * affiliate.commissionRate)
+
+  await db
+    .insert(affiliateSales)
+    .values({
+      affiliateId: affiliate.id,
+      stripeSessionId: payload.stripeSessionId,
+      amountCents: payload.amountCents,
+      commissionCents,
+      productType: payload.productType,
+      status: 'confirmed',
+    })
+    .onConflictDoNothing({
+      target: affiliateSales.stripeSessionId,
+    })
+
+  return { created: true, commissionCents }
+}
+
+export async function getAffiliatePublicDashboard(slug: string) {
+  const db = getDbOrThrow()
+  const affiliate = await findActiveAffiliateBySlug(slug)
+  if (!affiliate) return null
+
+  const [clickStats, salesStats] = await Promise.all([
+    db
+      .select({ totalClicks: count(affiliateClicks.id) })
+      .from(affiliateClicks)
+      .where(eq(affiliateClicks.affiliateId, affiliate.id)),
+    db
+      .select({
+        confirmedSales: sql<number>`count(*) FILTER (WHERE ${affiliateSales.status} = 'confirmed')`,
+        totalCommissions: sql<number>`coalesce(sum(${affiliateSales.commissionCents}) FILTER (WHERE ${affiliateSales.status} = 'confirmed'), 0)`,
+      })
+      .from(affiliateSales)
+      .where(eq(affiliateSales.affiliateId, affiliate.id)),
+  ])
+
+  const recentSales = await db
+    .select({
+      id: affiliateSales.id,
+      createdAt: affiliateSales.createdAt,
+      amountCents: affiliateSales.amountCents,
+      commissionCents: affiliateSales.commissionCents,
+      productType: affiliateSales.productType,
+      status: affiliateSales.status,
+    })
+    .from(affiliateSales)
+    .where(eq(affiliateSales.affiliateId, affiliate.id))
+    .orderBy(desc(affiliateSales.createdAt))
+    .limit(30)
+
+  const totalClicks = Number(clickStats[0]?.totalClicks || 0)
+  const confirmedSales = Number(salesStats[0]?.confirmedSales || 0)
+  const totalCommissions = Number(salesStats[0]?.totalCommissions || 0)
+  const conversionRate = totalClicks > 0 ? confirmedSales / totalClicks : 0
+
+  return {
+    affiliate: {
+      slug: affiliate.slug,
+      name: affiliate.name,
+      promoCode: affiliate.promoCode,
+      shareLink: `${String(useRuntimeConfig().public.siteUrl || '').replace(/\/$/, '')}/?ref=${affiliate.slug}`,
+    },
+    metrics: {
+      totalClicks,
+      confirmedSales,
+      totalCommissions,
+      conversionRate,
+    },
+    recentSales: recentSales.map((sale) => ({
+      ...sale,
+      createdAt: sale.createdAt.toISOString(),
+    })),
+  }
+}
+
+export async function getAdminAffiliatesDashboard() {
+  const db = getDbOrThrow()
+
+  const rows = await db
+    .select()
+    .from(affiliates)
+    .orderBy(desc(affiliates.createdAt))
+
+  const affiliateMetrics = await Promise.all(rows.map(async (row) => {
+    const [clickRow, salesRow] = await Promise.all([
+      db
+        .select({ totalClicks: count(affiliateClicks.id) })
+        .from(affiliateClicks)
+        .where(eq(affiliateClicks.affiliateId, row.id)),
+      db
+        .select({
+          confirmedSales: sql<number>`count(*) FILTER (WHERE ${affiliateSales.status} = 'confirmed')`,
+          totalCommissions: sql<number>`coalesce(sum(${affiliateSales.commissionCents}) FILTER (WHERE ${affiliateSales.status} = 'confirmed'), 0)`,
+        })
+        .from(affiliateSales)
+        .where(eq(affiliateSales.affiliateId, row.id)),
+    ])
+
+    return {
+      id: row.id,
+      slug: row.slug,
+      name: row.name,
+      email: row.email,
+      promoCode: row.promoCode,
+      commissionRate: row.commissionRate,
+      active: row.active,
+      createdAt: row.createdAt,
+      totalClicks: Number(clickRow[0]?.totalClicks || 0),
+      confirmedSales: Number(salesRow[0]?.confirmedSales || 0),
+      totalCommissions: Number(salesRow[0]?.totalCommissions || 0),
+    }
+  }))
+
+  const globalCommissions = affiliateMetrics.reduce((acc, row) => acc + Number(row.totalCommissions || 0), 0)
+
+  return {
+    affiliates: affiliateMetrics.map((row) => ({
+      ...row,
+      createdAt: row.createdAt.toISOString(),
+    })),
+    globalCommissions,
+  }
+}

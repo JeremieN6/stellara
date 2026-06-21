@@ -38,7 +38,10 @@ export default defineNuxtConfig({
     stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
     stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
     stripePriceId: process.env.STRIPE_PRICE_ID || '',
+      stripePriceIdMonthly: process.env.STRIPE_PRICE_ID_MONTHLY || '',
+      stripePriceIdYearly: process.env.STRIPE_PRICE_ID_YEARLY || '',
     stripeBuyLink: process.env.STRIPE_BUY_LINK || 'https://buy.stripe.com/test_example',
+      affiliateBuyerDiscountPercent: process.env.AFFILIATE_BUYER_DISCOUNT_PERCENT || '10',
     emailHost: process.env.EMAIL_HOST || process.env.SMTP_HOST || '',
     emailPort: process.env.EMAIL_PORT || process.env.SMTP_PORT || '587',
     emailUser: process.env.EMAIL_USER || process.env.SMTP_USER || '',
@@ -55,6 +58,7 @@ export default defineNuxtConfig({
       stripeBuyLinkFallback: process.env.STRIPE_BUY_LINK || '',
       stripeSubMonthlyLink: process.env.NUXT_PUBLIC_STRIPE_SUB_MONTHLY_LINK || '',
       stripeSubYearlyLink: process.env.NUXT_PUBLIC_STRIPE_SUB_YEARLY_LINK || '',
+        appUrl: process.env.NUXT_PUBLIC_APP_URL || process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000',
     },
   },
 
