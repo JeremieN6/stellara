@@ -1,4 +1,4 @@
-import { desc, eq } from 'drizzle-orm'
+import { and, desc, eq } from 'drizzle-orm'
 import tzLookup from 'tz-lookup'
 import { reports } from '../../../db/schema'
 import { buildNatalChart } from '../../utils/astro'
@@ -6,18 +6,25 @@ import { getDbOrThrow } from '../../utils/db'
 
 export default defineEventHandler(async (event) => {
   const email = String(getQuery(event).email || '').trim().toLowerCase()
+  const reportId = String(getQuery(event).reportId || '').trim()
 
   if (!email) {
     throw createError({ statusCode: 400, statusMessage: 'email query param is required' })
   }
 
   const db = getDbOrThrow(event)
-  const [report] = await db
-    .select()
-    .from(reports)
-    .where(eq(reports.email, email))
-    .orderBy(desc(reports.isPremium), desc(reports.createdAt))
-    .limit(1)
+  const [report] = reportId
+    ? await db
+      .select()
+      .from(reports)
+      .where(and(eq(reports.email, email), eq(reports.id, reportId)))
+      .limit(1)
+    : await db
+      .select()
+      .from(reports)
+      .where(eq(reports.email, email))
+      .orderBy(desc(reports.isPremium), desc(reports.createdAt))
+      .limit(1)
 
   if (!report) {
     return {

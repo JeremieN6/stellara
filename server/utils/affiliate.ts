@@ -215,6 +215,7 @@ export async function getAffiliatePublicDashboard(slug: string) {
   const conversionRate = totalClicks > 0 ? confirmedSales / totalClicks : 0
 
   return {
+    _secretToken: affiliate.secretToken,
     affiliate: {
       slug: affiliate.slug,
       name: affiliate.name,
@@ -236,6 +237,7 @@ export async function getAffiliatePublicDashboard(slug: string) {
 
 export async function getAdminAffiliatesDashboard() {
   const db = getDbOrThrow()
+  const siteUrl = String(useRuntimeConfig().public.siteUrl || useRuntimeConfig().public.appUrl || '').replace(/\/$/, '')
 
   const rows = await db
     .select({
@@ -246,6 +248,7 @@ export async function getAdminAffiliatesDashboard() {
       promoCode: affiliates.promoCode,
       commissionRate: affiliates.commissionRate,
       active: affiliates.active,
+      secretToken: affiliates.secretToken,
       createdAt: affiliates.createdAt,
     })
     .from(affiliates)
@@ -275,6 +278,7 @@ export async function getAdminAffiliatesDashboard() {
       commissionRate: row.commissionRate,
       active: row.active,
       createdAt: row.createdAt,
+      privateDashboardUrl: `${siteUrl}/affilie/${row.slug}?token=${row.secretToken}`,
       totalClicks: Number(clickRow[0]?.totalClicks || 0),
       confirmedSales: Number(salesRow[0]?.confirmedSales || 0),
       totalCommissions: Number(salesRow[0]?.totalCommissions || 0),

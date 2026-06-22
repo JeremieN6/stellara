@@ -51,6 +51,30 @@
             </p>
           </form>
 
+          <form class="mt-6" @submit.prevent="sendMagicLink">
+            <label class="mb-2 block text-xs uppercase tracking-[0.18em] text-slate-400">Connexion sécurisée</label>
+            <div class="flex flex-col gap-3 sm:flex-row">
+              <input
+                v-model="magicLinkEmailInput"
+                type="email"
+                class="form-input"
+                placeholder="email de paiement Stripe"
+                required
+              />
+              <button
+                type="submit"
+                class="rounded-full border border-white/20 bg-white/5 px-5 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-white transition-colors hover:bg-white/10"
+                :disabled="magicLinkLoading"
+                :class="magicLinkLoading ? 'cursor-not-allowed opacity-60' : ''"
+              >
+                {{ magicLinkLoading ? 'Envoi...' : 'Envoyer lien magique' }}
+              </button>
+            </div>
+            <p class="mt-2 text-xs text-slate-500">
+              Un lien de connexion sans mot de passe sera envoyé à cet email.
+            </p>
+          </form>
+
           <div class="mt-8 grid gap-4 sm:grid-cols-2">
             <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
               <p class="text-xs uppercase tracking-[0.16em] text-slate-400">Plan détecté</p>
@@ -75,6 +99,34 @@
             >
               Reprendre mon rapport
             </button>
+          </div>
+
+          <div class="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4">
+            <div class="flex items-center justify-between gap-3">
+              <p class="text-xs uppercase tracking-[0.16em] text-slate-400">Mes rapports</p>
+              <span class="text-xs text-slate-500">{{ reportsHistory.length }} rapport(s)</span>
+            </div>
+
+            <p v-if="reportsHistory.length === 0" class="mt-3 text-sm text-slate-400">
+              Aucun rapport sauvegarde pour ce compte.
+            </p>
+
+            <div v-else class="mt-3 space-y-2">
+              <button
+                v-for="item in reportsHistory"
+                :key="item.id"
+                type="button"
+                class="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-left transition-colors hover:bg-white/10"
+                @click="openReportFromHistory(item.id)"
+              >
+                <p class="text-sm text-white">
+                  {{ item.firstName }} - {{ item.sunSign }} / {{ item.moonSign }} / {{ item.ascendant }}
+                </p>
+                <p class="mt-1 text-xs text-slate-400">
+                  {{ formatHistoryDate(item.createdAt) }} - {{ item.city }} - {{ item.birthDate }}
+                </p>
+              </button>
+            </div>
           </div>
 
           <div class="mt-6 flex flex-wrap items-center gap-3">
@@ -152,13 +204,36 @@ type LatestReportResponse = {
   } | null
 }
 
+type AuthMeResponse = {
+  authenticated: boolean
+  email: string | null
+}
+
+type ReportsHistoryResponse = {
+  email: string
+  reports: Array<{
+    id: string
+    firstName: string
+    birthDate: string
+    city: string
+    sunSign: string
+    moonSign: string
+    ascendant: string
+    isPremium: boolean | null
+    createdAt: string
+  }>
+}
+
 const reportStore = useReportStore()
 
 const loading = ref(false)
 const errorMessage = ref('')
 const emailInput = ref('')
+const magicLinkEmailInput = ref('')
+const magicLinkLoading = ref(false)
 const profile = ref<ProfileResponse | null>(null)
 const latestReport = ref<LatestReportResponse['report']>(null)
+const reportsHistory = ref<ReportsHistoryResponse['reports']>([])
 
 const activeEmail = computed(() => reportStore.userEmail)
 
@@ -212,6 +287,11 @@ async function refreshAccount() {
         reportStore.setPremiumStatus(true)
       }
     }
+
+    const historyResponse = await $fetch('/api/report/history', {
+      query: { email },
+    }) as ReportsHistoryResponse
+    reportsHistory.value = historyResponse.reports || []
   } catch (error) {
     console.error('[account] refresh failed:', error)
     errorMessage.value = 'Impossible de recuperer vos informations pour le moment.'
@@ -228,12 +308,45 @@ async function connectEmail() {
   await refreshAccount()
 }
 
+async function sendMagicLink() {
+  const email = magicLinkEmailInput.value.trim().toLowerCase()
+  if (!email) return
+
+  magicLinkLoading.value = true
+  errorMessage.value = ''
+
+  try {
+    const response = await $fetch('/api/auth/magic-link', {
+      method: 'POST',
+      body: { email },
+    }) as { sent: boolean; reason?: string | null }
+
+    if (!response.sent) {
+      errorMessage.value = 'Envoi du lien impossible pour le moment. Verifie la configuration SMTP.'
+      return
+    }
+
+    errorMessage.value = 'Lien magique envoyé. Vérifie ta boite email pour te connecter.'
+  } catch (error) {
+    console.error('[account] magic link failed:', error)
+    errorMessage.value = 'Impossible d envoyer le lien magique.'
+  } finally {
+    magicLinkLoading.value = false
+  }
+}
+
 function disconnect() {
   reportStore.clearSession()
   profile.value = null
   latestReport.value = null
+  reportsHistory.value = []
   emailInput.value = ''
+  magicLinkEmailInput.value = ''
   errorMessage.value = ''
+
+  $fetch('/api/auth/logout', { method: 'POST' }).catch((error) => {
+    console.error('[account] logout failed:', error)
+  })
 }
 
 async function resumeLatestReport() {
@@ -246,9 +359,83 @@ async function resumeLatestReport() {
   await navigateTo('/rapport')
 }
 
+async function openReportFromHistory(reportId: string) {
+  const selected = reportsHistory.value.find((item) => item.id === reportId)
+  if (!selected) return
+
+  const email = activeEmail.value
+  if (!email) {
+    errorMessage.value = 'Connecte un email pour ouvrir un rapport.'
+    return
+  }
+
+  try {
+    const response = await $fetch('/api/report/latest', {
+      query: {
+        email,
+        reportId: selected.id,
+      },
+    }) as LatestReportResponse
+
+    if (!response?.report) {
+      errorMessage.value = 'Impossible de charger ce rapport pour le moment.'
+      return
+    }
+
+    reportStore.setReportData(response.report)
+    latestReport.value = response.report
+    if (response.isPremium) {
+      reportStore.setPremiumStatus(true)
+    }
+
+    await navigateTo('/rapport')
+  } catch (error) {
+    console.error('[account] open report from history failed:', error)
+    errorMessage.value = 'Impossible de charger ce rapport pour le moment.'
+  }
+}
+
+function formatHistoryDate(value: string): string {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  return date.toLocaleDateString('fr-FR')
+}
+
 onMounted(async () => {
   reportStore.initFromStorage()
+
+  const route = useRoute()
+
+  const magicToken = typeof route.query.magic_token === 'string' ? route.query.magic_token : ''
+  if (magicToken) {
+    try {
+      const verifyResponse = await $fetch('/api/auth/verify-magic-link', {
+        method: 'POST',
+        body: { token: magicToken },
+      }) as { email: string }
+
+      if (verifyResponse.email) {
+        reportStore.setUserEmail(verifyResponse.email)
+      }
+    } catch (error) {
+      console.error('[account] magic link verification failed:', error)
+      errorMessage.value = 'Lien magique invalide ou expiré.'
+    }
+
+    await navigateTo('/account', { replace: true })
+  }
+
+  try {
+    const me = await $fetch('/api/auth/me') as AuthMeResponse
+    if (me.authenticated && me.email) {
+      reportStore.setUserEmail(me.email)
+    }
+  } catch (error) {
+    console.error('[account] auth me failed:', error)
+  }
+
   emailInput.value = reportStore.userEmail
+  magicLinkEmailInput.value = reportStore.userEmail
 
   if (reportStore.userEmail) {
     await refreshAccount()

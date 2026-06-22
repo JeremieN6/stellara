@@ -147,10 +147,12 @@ export const affiliates = pgTable('affiliates', {
   stripeCouponId: text('stripe_coupon_id').notNull(),
   commissionRate: real('commission_rate').default(0.4).notNull(),
   active: boolean('active').default(true).notNull(),
+  secretToken: text('secret_token').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 }, (table) => ({
   slugUnique: uniqueIndex('affiliates_slug_unique').on(table.slug),
   promoCodeUnique: uniqueIndex('affiliates_promo_code_unique').on(table.promoCode),
+  secretTokenUnique: uniqueIndex('affiliates_secret_token_unique').on(table.secretToken),
   emailIdx: index('affiliates_email_idx').on(table.email),
   activeIdx: index('affiliates_active_idx').on(table.active),
 }))
@@ -184,4 +186,17 @@ export const affiliateSales = pgTable('affiliate_sales', {
   subscriptionIdx: index('affiliate_sales_subscription_idx').on(table.stripeSubscriptionId),
   statusIdx: index('affiliate_sales_status_idx').on(table.status),
   createdAtIdx: index('affiliate_sales_created_at_idx').on(table.createdAt),
+}))
+
+export const authMagicLinks = pgTable('auth_magic_links', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  email: text('email').notNull(),
+  tokenHash: text('token_hash').notNull(),
+  expiresAt: timestamp('expires_at').notNull(),
+  usedAt: timestamp('used_at'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => ({
+  tokenHashUnique: uniqueIndex('auth_magic_links_token_hash_unique').on(table.tokenHash),
+  emailIdx: index('auth_magic_links_email_idx').on(table.email),
+  expiresAtIdx: index('auth_magic_links_expires_at_idx').on(table.expiresAt),
 }))

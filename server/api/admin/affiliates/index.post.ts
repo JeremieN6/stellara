@@ -1,8 +1,10 @@
+import { randomBytes } from 'node:crypto'
 import { eq } from 'drizzle-orm'
 import { affiliates } from '../../../../db/schema'
 import { assertAdminAccess } from '../../../utils/admin-auth'
 import { getDbOrThrow } from '../../../utils/db'
 import { normalizeSlug } from '../../../utils/affiliate'
+import { sendPreviewEmail } from '../../../utils/mailer'
 import { getStripeOrThrow } from '../../../utils/stripe-client'
 
 type CreateAffiliateRequest = {
@@ -23,6 +25,10 @@ function normalizePromoCode(input: string): string {
 
 function assertEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+}
+
+function canAttemptEmailDelivery(email: string): boolean {
+  return assertEmail(email)
 }
 
 export default defineEventHandler(async (event) => {
@@ -75,6 +81,8 @@ export default defineEventHandler(async (event) => {
     name: `Affiliation ${slug}`,
   })
 
+  const secretToken = randomBytes(32).toString('hex')
+
   const [affiliate] = await db.insert(affiliates).values({
     name,
     email,
@@ -82,12 +90,53 @@ export default defineEventHandler(async (event) => {
     promoCode,
     stripeCouponId: stripeCoupon.id,
     commissionRate,
+    secretToken,
     active: true,
   }).returning()
 
+  const runtimeConfig = useRuntimeConfig(event)
+  const siteUrl = String(runtimeConfig.public.siteUrl || runtimeConfig.public.appUrl || '').replace(/\/$/, '')
+  const privateDashboardUrl = `${siteUrl}/affilie/${slug}?token=${secretToken}`
+
+  let emailDelivery = {
+    sent: false,
+    reason: 'not_attempted',
+  }
+
+  if (canAttemptEmailDelivery(email)) {
+    emailDelivery = await sendPreviewEmail({
+      to: email,
+      subject: `Ton accès influenceur Stellara pour ${name}`,
+      text: [
+        `Bonjour ${name},`,
+        '',
+        'Ton tableau de bord influenceur est prêt :',
+        privateDashboardUrl,
+        '',
+        'Conserve ce lien précieusement, il est unique et privé.',
+      ].join('\n'),
+      html: `
+        <p>Bonjour ${name},</p>
+        <p>Ton tableau de bord influenceur Stellara est prêt.</p>
+        <p><a href="${privateDashboardUrl}">Ouvrir mon tableau de bord privé</a></p>
+        <p>Conserve ce lien précieusement, il est unique et privé.</p>
+      `,
+    })
+  } else {
+    emailDelivery = {
+      sent: false,
+      reason: 'invalid_email_format',
+    }
+  }
+
   return {
     ok: true,
-    affiliate,
+    affiliate: {
+      ...affiliate,
+      secretToken: undefined,
+    },
+    privateDashboardUrl,
+    emailDelivery,
     buyerDiscountPercent: requestedBuyerDiscountPercent,
   }
 })

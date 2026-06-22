@@ -52,6 +52,21 @@ onMounted(async () => {
   let reportId = typeof route.query.report_id === 'string' ? route.query.report_id : ''
   const sessionId = typeof route.query.session_id === 'string' ? route.query.session_id : ''
 
+  if (sessionId) {
+    try {
+      const loginResponse = await $fetch('/api/auth/checkout-session-login', {
+        method: 'POST',
+        body: { sessionId },
+      }) as { email?: string }
+
+      if (!email && loginResponse?.email) {
+        email = loginResponse.email
+      }
+    } catch (error) {
+      console.error('[checkout/success] checkout-session-login failed:', error)
+    }
+  }
+
   if ((!email || !reportId) && sessionId) {
     try {
       const session = await $fetch('/api/stripe/checkout-session', {

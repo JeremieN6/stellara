@@ -36,6 +36,31 @@
           </button>
         </form>
         <p v-if="createMessage" class="mt-3 text-sm text-emerald-300">{{ createMessage }}</p>
+
+        <div v-if="lastCreatedAffiliate" class="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4">
+          <p class="text-xs uppercase tracking-[0.16em] text-slate-400">Acces prive genere</p>
+          <div class="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <a
+              :href="lastCreatedAffiliate.privateDashboardUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="break-all text-sm text-sky-300 underline decoration-white/20 underline-offset-2"
+            >
+              {{ lastCreatedAffiliate.privateDashboardUrl }}
+            </a>
+            <button
+              type="button"
+              class="rounded-md border border-white/20 px-3 py-2 text-[11px] uppercase tracking-[0.08em] text-white/90 hover:bg-white/10"
+              @click="copyPrivateLink(lastCreatedAffiliate.privateDashboardUrl)"
+            >
+              {{ copiedPrivateLink === lastCreatedAffiliate.privateDashboardUrl ? 'Copie' : 'Copier' }}
+            </button>
+          </div>
+          <p class="mt-3 text-xs text-slate-400">
+            Email: {{ lastCreatedAffiliate.emailDelivery.sent ? 'envoye' : 'non envoye' }}
+            <span v-if="lastCreatedAffiliate.emailDelivery.reason">- {{ lastCreatedAffiliate.emailDelivery.reason }}</span>
+          </p>
+        </div>
       </div>
 
       <div v-if="dashboard" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -116,6 +141,7 @@ type AdminDashboard = {
     totalClicks: number
     confirmedSales: number
     totalCommissions: number
+    privateDashboardUrl?: string
   }>
   globalCommissions: number
 }
@@ -126,7 +152,15 @@ const creating = ref(false)
 const errorMessage = ref('')
 const createMessage = ref('')
 const copiedSlug = ref('')
+const copiedPrivateLink = ref('')
 const dashboard = ref<AdminDashboard | null>(null)
+const lastCreatedAffiliate = ref<null | {
+  privateDashboardUrl: string
+  emailDelivery: {
+    sent: boolean
+    reason?: string
+  }
+}>(null)
 const runtimeConfig = useRuntimeConfig()
 
 const affiliateBaseUrl = computed(() => {
@@ -179,9 +213,16 @@ async function createAffiliate() {
         Authorization: `Bearer ${adminToken.value}`,
       },
       body: createForm,
-    }) as { ok: boolean; affiliate: { slug: string }; buyerDiscountPercent: number }
+    }) as { ok: boolean; affiliate: { slug: string }; buyerDiscountPercent: number; privateDashboardUrl: string; emailDelivery: { sent: boolean; reason?: string | null } }
 
     createMessage.value = `Affilié crée avec succes: ${response.affiliate.slug} (${response.buyerDiscountPercent}% de reduction client)`
+    lastCreatedAffiliate.value = {
+      privateDashboardUrl: response.privateDashboardUrl,
+      emailDelivery: {
+        sent: response.emailDelivery.sent,
+        reason: response.emailDelivery.reason || undefined,
+      },
+    }
     await loadDashboard()
   } catch (error) {
     console.error('[admin/affiliates] create failed:', error)
@@ -224,6 +265,32 @@ async function copyAffiliateLink(slug: string) {
   } catch (error) {
     console.error('[admin/affiliates] copy link failed:', error)
     errorMessage.value = 'Impossible de copier le lien dans le presse-papiers.'
+  }
+}
+
+async function copyPrivateLink(link: string) {
+  try {
+    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(link)
+    } else if (typeof document !== 'undefined') {
+      const textarea = document.createElement('textarea')
+      textarea.value = link
+      textarea.setAttribute('readonly', 'readonly')
+      textarea.style.position = 'absolute'
+      textarea.style.left = '-9999px'
+      document.body.appendChild(textarea)
+      textarea.select()
+      document.execCommand('copy')
+      document.body.removeChild(textarea)
+    }
+
+    copiedPrivateLink.value = link
+    setTimeout(() => {
+      if (copiedPrivateLink.value === link) copiedPrivateLink.value = ''
+    }, 1500)
+  } catch (error) {
+    console.error('[admin/affiliates] copy private link failed:', error)
+    errorMessage.value = 'Impossible de copier le lien prive dans le presse-papiers.'
   }
 }
 

@@ -44,6 +44,7 @@ export default defineNuxtConfig({
       stripePriceIdYearly: process.env.STRIPE_PRICE_ID_YEARLY || '',
     stripeBuyLink: process.env.STRIPE_BUY_LINK || '',
       affiliateBuyerDiscountPercent: process.env.AFFILIATE_BUYER_DISCOUNT_PERCENT || '10',
+    authSessionSecret: process.env.JWT_SECRET || process.env.AUTH_SESSION_SECRET || '',
     emailHost: process.env.EMAIL_HOST || process.env.SMTP_HOST || '',
     emailPort: process.env.EMAIL_PORT || process.env.SMTP_PORT || '587',
     emailUser: process.env.EMAIL_USER || process.env.SMTP_USER || '',
