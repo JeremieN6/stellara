@@ -60,3 +60,5 @@
 > 2026-05-21: Lancement concret de la migration full JS. Mise en place du socle DB JS dans Nitro, ajout des tables core (users/plans/subscriptions/invoices), nouveaux endpoints account/subscription, et webhook Stripe cote Nuxt avec verification de signature. Prochaine etape: migrations Drizzle + branchement UI premium sur statut abonnement serveur.
 >
 > 2026-06-22: Integration Brevo ajoutee sur la capture d'email du rapport. Le contact est synchronise avec PRENOM/SIGNE_ASTRO/LUNE/ASCENDANT et ajoute a la liste d'automation, via un helper serveur non bloquant avec timeout et fallback silencieux.
+>
+> 2026-06-23: Correctif persistance prenom. Lors de /api/report/capture-email, le prenom est maintenant normalise puis upsert dans users_js.first_name (en plus de reports et lead_magnet_contacts), pour alimenter correctement les attributs de campagne email.

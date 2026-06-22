@@ -1,5 +1,5 @@
 import { eq } from 'drizzle-orm'
-import { reports } from '../../../db/schema'
+import { reports, users } from '../../../db/schema'
 import { syncContactToBrevo } from '../../utils/brevo'
 import { getDbIfConfigured } from '../../utils/db'
 import { buildPreviewPdfBuffer, type PreviewPdfPayload } from '../../utils/report-preview-pdf'
@@ -31,30 +31,34 @@ export default defineEventHandler(async (event) => {
   const db = getDbIfConfigured(event)
 
   let moonSign: string | null = null
+  let reportFirstName: string | null = null
   if (db && reportId) {
     try {
       const [reportRow] = await db
-        .select({ moonSign: reports.moonSign })
+        .select({ moonSign: reports.moonSign, firstName: reports.firstName })
         .from(reports)
         .where(eq(reports.id, reportId))
         .limit(1)
       moonSign = reportRow?.moonSign || null
+      reportFirstName = reportRow?.firstName || null
     } catch (moonSignError) {
       console.error('[report/capture-email] moon sign lookup failed:', moonSignError)
     }
   }
 
+  const normalizedFirstName = normalizeFirstName(body.previewPayload?.firstName, reportFirstName)
+
   if (!db || !reportId) {
     try {
       await upsertLeadMagnetContact({
         email,
-        firstName: body.previewPayload?.firstName ?? null,
+        firstName: normalizedFirstName,
         moonSign,
         reportId: reportId || null,
       })
       await syncContactToBrevo({
         email,
-        prenom: body.previewPayload?.firstName ?? 'vous',
+        prenom: normalizedFirstName || 'vous',
         signeAstro: body.previewPayload?.sunSign ?? 'Non calculé',
         lune: body.previewPayload?.moonSign ?? 'Non calculé',
         ascendant: body.previewPayload?.ascendant ?? 'Non calculé',
@@ -82,15 +86,37 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
+    const now = new Date()
+    const userUpdate: Partial<typeof users.$inferInsert> = { updatedAt: now }
+    if (normalizedFirstName) {
+      userUpdate.firstName = normalizedFirstName
+    }
+
+    await db
+      .insert(users)
+      .values({
+        email,
+        firstName: normalizedFirstName,
+        updatedAt: now,
+      })
+      .onConflictDoUpdate({
+        target: users.email,
+        set: userUpdate,
+      })
+  } catch (error) {
+    console.error('[report/capture-email] users upsert failed:', error)
+  }
+
+  try {
     await upsertLeadMagnetContact({
       email,
-      firstName: body.previewPayload?.firstName ?? null,
+      firstName: normalizedFirstName,
       moonSign,
       reportId,
     })
     await syncContactToBrevo({
       email,
-      prenom: body.previewPayload?.firstName ?? 'vous',
+      prenom: normalizedFirstName || 'vous',
       signeAstro: body.previewPayload?.sunSign ?? 'Non calculé',
       lune: body.previewPayload?.moonSign ?? 'Non calculé',
       ascendant: body.previewPayload?.ascendant ?? 'Non calculé',
@@ -130,4 +156,12 @@ async function sendPreviewByEmail(email: string, payload?: PreviewPdfPayload) {
       },
     ],
   })
+}
+
+function normalizeFirstName(
+  fromPayload?: string | null,
+  fromReport?: string | null,
+): string | null {
+  const raw = String(fromPayload || fromReport || '').trim()
+  return raw || null
 }
