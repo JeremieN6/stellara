@@ -10,7 +10,7 @@ export function getStripeOrThrow(event?: Parameters<typeof useRuntimeConfig>[0])
   if (!secretKey) {
     throw createError({
       statusCode: 500,
-      statusMessage: 'STRIPE_SECRET_KEY is not configured.',
+      statusMessage: 'Stripe secret key is not configured. Set STRIPE_SECRET_KEY (or legacy STRIPE_SK).',
     })
   }
 

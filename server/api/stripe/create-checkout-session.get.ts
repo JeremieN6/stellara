@@ -32,6 +32,13 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 500, statusMessage: 'Stripe price id is not configured.' })
   }
 
+  if (!selectedPriceId.startsWith('price_')) {
+    throw createError({
+      statusCode: 500,
+      statusMessage: `Invalid Stripe price id: "${selectedPriceId}". Configure STRIPE_PRICE_ID / STRIPE_PRICE_ID_MONTHLY / STRIPE_PRICE_ID_YEARLY with values starting by price_.`,
+    })
+  }
+
   const siteUrl = String(config.public.appUrl || config.public.siteUrl || 'http://localhost:3000').replace(/\/$/, '')
   const successUrl = `${siteUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`
   const cancelUrl = `${siteUrl}/rapport`
