@@ -168,7 +168,10 @@ export const affiliateClicks = pgTable('affiliate_clicks', {
 export const affiliateSales = pgTable('affiliate_sales', {
   id: uuid('id').primaryKey().defaultRandom(),
   affiliateId: uuid('affiliate_id').notNull().references(() => affiliates.id, { onDelete: 'cascade' }),
-  stripeSessionId: text('stripe_session_id').notNull(),
+  stripeSessionId: text('stripe_session_id'),
+  stripeSubscriptionId: text('stripe_subscription_id'),
+  stripeInvoiceId: text('stripe_invoice_id'),
+  recurrenceCount: integer('recurrence_count').default(1).notNull(),
   amountCents: integer('amount_cents').notNull(),
   commissionCents: integer('commission_cents').notNull(),
   productType: text('product_type').notNull(),
@@ -176,7 +179,9 @@ export const affiliateSales = pgTable('affiliate_sales', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 }, (table) => ({
   stripeSessionUnique: uniqueIndex('affiliate_sales_stripe_session_unique').on(table.stripeSessionId),
+  stripeInvoiceUnique: uniqueIndex('affiliate_sales_stripe_invoice_unique').on(table.stripeInvoiceId),
   affiliateIdx: index('affiliate_sales_affiliate_idx').on(table.affiliateId),
+  subscriptionIdx: index('affiliate_sales_subscription_idx').on(table.stripeSubscriptionId),
   statusIdx: index('affiliate_sales_status_idx').on(table.status),
   createdAtIdx: index('affiliate_sales_created_at_idx').on(table.createdAt),
 }))

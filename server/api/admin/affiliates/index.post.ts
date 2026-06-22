@@ -11,6 +11,7 @@ type CreateAffiliateRequest = {
   slug?: string
   promoCode?: string
   commissionRate?: number
+  buyerDiscountPercent?: number
 }
 
 function normalizePromoCode(input: string): string {
@@ -37,6 +38,9 @@ export default defineEventHandler(async (event) => {
   const slug = normalizeSlug(String(body.slug || ''))
   const promoCode = normalizePromoCode(String(body.promoCode || ''))
   const commissionRate = Number.isFinite(Number(body.commissionRate)) ? Number(body.commissionRate) : 0.4
+  const requestedBuyerDiscountPercent = Number.isFinite(Number(body.buyerDiscountPercent))
+    ? Number(body.buyerDiscountPercent)
+    : Number(config.affiliateBuyerDiscountPercent || 10)
 
   if (!name || !email || !slug || !promoCode) {
     throw createError({ statusCode: 400, statusMessage: 'name, email, slug et promoCode sont requis.' })
@@ -50,6 +54,10 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'commissionRate doit etre entre 0 et 1.' })
   }
 
+  if (requestedBuyerDiscountPercent <= 0 || requestedBuyerDiscountPercent >= 100) {
+    throw createError({ statusCode: 400, statusMessage: 'buyerDiscountPercent doit etre entre 1 et 99.' })
+  }
+
   const [slugExisting] = await db.select({ id: affiliates.id }).from(affiliates).where(eq(affiliates.slug, slug)).limit(1)
   if (slugExisting) {
     throw createError({ statusCode: 409, statusMessage: 'Ce slug est deja utilise.' })
@@ -60,10 +68,9 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 409, statusMessage: 'Ce code promo est deja utilise.' })
   }
 
-  const buyerDiscountPercent = Number(config.affiliateBuyerDiscountPercent || 10)
   const stripeCoupon = await stripe.coupons.create({
     id: promoCode,
-    percent_off: buyerDiscountPercent,
+    percent_off: requestedBuyerDiscountPercent,
     duration: 'forever',
     name: `Affiliation ${slug}`,
   })
@@ -81,6 +88,6 @@ export default defineEventHandler(async (event) => {
   return {
     ok: true,
     affiliate,
-    buyerDiscountPercent,
+    buyerDiscountPercent: requestedBuyerDiscountPercent,
   }
 })

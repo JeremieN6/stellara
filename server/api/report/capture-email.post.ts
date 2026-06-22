@@ -104,9 +104,9 @@ async function sendPreviewByEmail(email: string, payload?: PreviewPdfPayload) {
 
   return sendPreviewEmail({
     to: email,
-    subject: 'Votre apercu de theme natal - Stellara',
-    text: `${firstName}, voici votre apercu tronque de theme natal en piece jointe. Pour debloquer la lecture complete, revenez sur Stellara et activez le rapport premium.`,
-    html: `<p>Bonjour ${firstName},</p><p>Voici votre apercu tronque de theme natal en piece jointe.</p><p>Pour debloquer la lecture complete, revenez sur Stellara et activez le rapport premium.</p><p>A bientot,<br>Stellara</p>`,
+    subject: 'Votre aperçu de theme natal - Stellara',
+    text: `${firstName}, voici votre aperçu tronque de theme natal en piece jointe. Pour debloquer la lecture complete, revenez sur Stellara et activez le rapport premium.`,
+    html: `<p>Bonjour ${firstName},</p><p>Voici votre aperçu tronque de theme natal en piece jointe.</p><p>Pour debloquer la lecture complete, revenez sur Stellara et activez le rapport premium.</p><p>A bientot,<br>Stellara</p>`,
     attachments: [
       {
         filename: 'apercu-theme-stellara.pdf',

@@ -13,9 +13,9 @@
               vos relations et votre potentiel caché.
             </p>
             <div class="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-400 sm:gap-6">
-              <span class="inline-flex items-center gap-2"><span class="text-amber-300">🔒</span> Données privees</span>
+              <span class="inline-flex items-center gap-2"><span class="text-amber-300">🔒</span> Données privées</span>
               <span class="inline-flex items-center gap-2"><span class="text-amber-300">⚡</span> Résultat en 30s</span>
-              <span class="inline-flex items-center gap-2"><span class="text-amber-300">✦</span> 100% gratuit</span>
+              <span class="inline-flex items-center gap-2"><span class="text-amber-300">✦</span> 100% Gratuit</span>
             </div>
           </header>
 
@@ -159,6 +159,11 @@ const unknownBirthTime = ref(false)
 
 onMounted(() => {
   reportStore.initFromStorage()
+
+  if (reportStore.reportData) {
+    step.value = 2
+  }
+
   if (reportStore.userEmail) {
     reportStore.syncPremiumStatusFromServer(reportStore.userEmail)
   }

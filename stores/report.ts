@@ -24,6 +24,9 @@ export const useReportStore = defineStore('report', {
 
     setReportData(data: Record<string, unknown>) {
       this.reportData = data
+      if (import.meta.client) {
+        localStorage.setItem('Stellara_report_data', JSON.stringify(data))
+      }
     },
 
     setUserEmail(email: string) {
@@ -40,9 +43,11 @@ export const useReportStore = defineStore('report', {
     clearSession() {
       this.userEmail = ''
       this.isPremium = false
+      this.reportData = null
       if (import.meta.client) {
         localStorage.removeItem('Stellara_email')
         localStorage.removeItem('Stellara_premium')
+        localStorage.removeItem('Stellara_report_data')
       }
     },
 
@@ -54,7 +59,17 @@ export const useReportStore = defineStore('report', {
         const response = await $fetch<{ isPremium: boolean }>('/api/user/subscription-status', {
           query: { email: targetEmail },
         })
-        this.setPremiumStatus(Boolean(response?.isPremium))
+        const serverIsPremium = Boolean(response?.isPremium)
+
+        if (serverIsPremium) {
+          this.setPremiumStatus(true)
+          return
+        }
+
+        // Preserve local one-time premium unlocks for report purchases.
+        if (!this.isPremium) {
+          this.setPremiumStatus(false)
+        }
       } catch (error) {
         console.error('[report-store] premium status sync failed:', error)
       }
@@ -64,6 +79,18 @@ export const useReportStore = defineStore('report', {
       if (import.meta.client) {
         this.isPremium = localStorage.getItem('Stellara_premium') === '1'
         this.userEmail = localStorage.getItem('Stellara_email') || ''
+
+        const rawReport = localStorage.getItem('Stellara_report_data')
+        if (rawReport) {
+          try {
+            const parsed = JSON.parse(rawReport)
+            if (parsed && typeof parsed === 'object') {
+              this.reportData = parsed as Record<string, unknown>
+            }
+          } catch {
+            localStorage.removeItem('Stellara_report_data')
+          }
+        }
       }
     },
   },

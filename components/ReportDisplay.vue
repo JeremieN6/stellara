@@ -49,25 +49,25 @@
           <h3 class="font-display text-2xl text-white sm:text-3xl">Votre lecture rapide</h3>
         </div>
         <button
-          v-if="hasLeadEmail"
+          v-if="hasAccessUnlocked"
           type="button"
           class="rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition-colors hover:border-white/30 hover:text-white"
           :disabled="pdfLoading"
           @click="downloadPreviewPdf"
         >
-          {{ pdfLoading ? 'Generation...' : 'Recevoir l\'apercu PDF' }}
+          {{ pdfLoading ? 'Generation...' : (isPremium ? 'Telecharger mon rapport complet' : 'Recevoir mon aperçu PDF') }}
         </button>
       </div>
       <p class="mt-4 text-sm leading-7 text-slate-200 sm:text-[15px]">{{ summaryText }}</p>
     </section>
 
-    <section v-if="!hasLeadEmail" class="glass-panel overflow-hidden border border-white/15 px-5 py-5 sm:px-8 sm:py-7">
+    <section v-if="showLeadCapture" class="glass-panel overflow-hidden border border-white/15 px-5 py-5 sm:px-8 sm:py-7">
       <div class="mb-4 flex items-center justify-between gap-4">
         <div>
           <p class="eyebrow mb-1">Planètes</p>
           <h3 class="font-display text-2xl text-white sm:text-3xl">Positions planetaires</h3>
         </div>
-        <span class="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-slate-300">Apercu gratuit</span>
+        <span class="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-slate-300">{{ isPremium ? 'Acces complet' : 'Aperçu gratuit' }}</span>
       </div>
 
       <div class="grid grid-cols-2 gap-2 sm:grid-cols-5 sm:gap-3">
@@ -85,7 +85,7 @@
     </section>
 
     <section
-      v-if="!hasLeadEmail"
+      v-if="showLeadCapture"
       class="glass-panel relative overflow-hidden border border-amber-400/30 bg-gradient-to-b from-amber-400/10 to-transparent px-5 py-5 sm:px-8 sm:py-7"
     >
       <div class="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-amber-300/20 blur-2xl" />
@@ -93,7 +93,7 @@
         <p class="eyebrow mb-2">Étape suivante</p>
         <h3 class="font-display text-2xl text-white sm:text-3xl">Recevez votre aperçu et sauvegardez votre theme</h3>
         <p class="mt-3 max-w-6xl text-sm leading-7 text-slate-200">
-          Entrez votre email pour reçevoir votre rapport en PDF. Retrouver votre lecture plus tard et debloquer 1 planète supplementaire en apercu gratuit.
+          Entrez votre email pour reçevoir votre rapport en PDF. Retrouver votre lecture plus tard et debloquer 1 planète supplementaire en aperçu gratuit.
         </p>
 
         <form class="mt-5 space-y-4" @submit.prevent="submitLeadEmail">
@@ -121,13 +121,13 @@
       </div>
     </section>
 
-    <section v-if="hasLeadEmail" class="glass-panel overflow-hidden border border-white/15 px-5 py-5 sm:px-8 sm:py-7">
+    <section v-if="hasAccessUnlocked" class="glass-panel overflow-hidden border border-white/15 px-5 py-5 sm:px-8 sm:py-7">
       <div class="mb-4 flex items-center justify-between gap-4">
         <div>
           <p class="eyebrow mb-1">Planètes</p>
           <h3 class="font-display text-2xl text-white sm:text-3xl">Positions planetaires</h3>
         </div>
-        <span class="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-slate-300">Apercu gratuit</span>
+        <span class="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-slate-300">{{ isPremium ? 'Acces complet' : 'Aperçu gratuit' }}</span>
       </div>
 
       <div class="grid grid-cols-2 gap-2 sm:grid-cols-5 sm:gap-3">
@@ -150,13 +150,13 @@
       </div>
     </section>
 
-    <section v-if="hasLeadEmail" class="glass-panel overflow-hidden border border-white/15 px-5 py-5 sm:px-8 sm:py-7">
+    <section v-if="hasAccessUnlocked" class="glass-panel overflow-hidden border border-white/15 px-5 py-5 sm:px-8 sm:py-7">
       <div class="mb-4 flex items-center justify-between gap-4">
         <div>
           <p class="eyebrow mb-1">Maisons astrologiques</p>
           <h3 class="font-display text-2xl text-white sm:text-3xl">Les 12 maisons</h3>
         </div>
-        <span class="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-slate-300">Apercu gratuit</span>
+        <span class="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-slate-300">{{ isPremium ? 'Acces complet' : 'Aperçu gratuit' }}</span>
       </div>
 
       <div class="space-y-2">
@@ -176,7 +176,7 @@
       </div>
     </section>
 
-    <section v-if="hasLeadEmail" class="glass-panel relative overflow-hidden border border-white/15 px-5 py-5 sm:px-8 sm:py-7">
+    <section v-if="hasAccessUnlocked" class="glass-panel relative overflow-hidden border border-white/15 px-5 py-5 sm:px-8 sm:py-7">
       <div :class="isPremium ? '' : 'blur-[4px] opacity-60 select-none'">
         <p class="eyebrow mb-1">Aspects planetaires</p>
         <h3 class="font-display text-2xl text-white sm:text-3xl">Harmonies et tensions du ciel</h3>
@@ -189,11 +189,11 @@
       </div>
     </section>
 
-    <section v-if="hasLeadEmail" class="glass-panel text-center relative overflow-hidden border border-amber-400/30 bg-gradient-to-b from-violet-500/15 to-transparent px-5 py-7 sm:px-8 sm:py-9">
+    <section v-if="hasAccessUnlocked && !isPremium" class="glass-panel text-center relative overflow-hidden border border-amber-400/30 bg-gradient-to-b from-violet-500/15 to-transparent px-5 py-7 sm:px-8 sm:py-9">
       <p class="mx-auto mb-3 inline-flex rounded-full border border-amber-400/35 bg-amber-400/10 px-4 py-1 text-xs uppercase tracking-[0.2em] text-amber-300">
         ✦ Rapport complet premium ✦
       </p>
-      <h3 class="text-center font-display text-3xl text-white sm:text-3xl">Debloquez l'integralite de votre theme natal</h3>
+      <h3 class="text-center font-display text-3xl text-white sm:text-3xl">Débloquez l'integralité de votre theme natal</h3>
       <p class="mx-auto mt-4 max-w-3xl text-center text-sm leading-7 text-slate-200 sm:text-base">
         Accedez aux 10 planètes, aux 12 maisons, aux aspects planetaires, aux transits et a la compatibilité amoureuse.
       </p>
@@ -228,13 +228,13 @@
 
     <div class="space-y-2 py-2 text-center flex flex-col items-center justify-center gap-3">
       <button
-        v-if="hasLeadEmail"
+        v-if="hasAccessUnlocked"
         type="button"
         class="mx-auto inline-flex items-center gap-2 rounded-full border border-amber-400/35 bg-amber-400/10 px-4 py-2 text-sm font-medium text-amber-200 transition-colors hover:border-amber-300/60 hover:text-amber-100"
         :disabled="pdfLoading"
         @click="downloadPreviewPdf"
       >
-        {{ pdfLoading ? 'Generation...' : 'Recevoir mon rapport PDF' }}
+        {{ pdfLoading ? 'Generation...' : (isPremium ? 'Telecharger mon rapport complet' : 'Recevoir mon aperçu PDF') }}
       </button>
 
       <NuxtLink to="/rapport" class="text-sm text-slate-400 underline underline-offset-4 transition-colors hover:text-white">
@@ -255,9 +255,21 @@ const emit = defineEmits<{
   (e: 'capture-email', email: string): void
 }>()
 
-const config = useRuntimeConfig()
+const isPremium = computed(() => props.isPremium)
+const reportData = computed(() => props.report as Record<string, unknown>)
+const hasLeadEmail = computed(() => props.userEmail.trim().length > 0)
+const hasAccessUnlocked = computed(() => isPremium.value || hasLeadEmail.value)
+const showLeadCapture = computed(() => !isPremium.value && !hasLeadEmail.value)
+
 const stripeLink = computed(() => {
-  return '/api/stripe/create-checkout-session?productType=rapport_complet'
+  const params = new URLSearchParams({ productType: 'rapport_complet' })
+  const reportId = String(reportData.value.reportId || '').trim()
+  const email = String(props.userEmail || '').trim()
+
+  if (reportId) params.set('reportId', reportId)
+  if (email) params.set('email', email)
+
+  return `/api/stripe/create-checkout-session?${params.toString()}`
 })
 
 const planetEmoji: Record<string, string> = {
@@ -272,9 +284,6 @@ const planetEmoji: Record<string, string> = {
   Neptune: '♆',
   Pluton: '♇',
 }
-
-const reportData = computed(() => props.report as Record<string, unknown>)
-const hasLeadEmail = computed(() => props.userEmail.trim().length > 0)
 
 const leadEmail = ref('')
 const leadSubmitting = ref(false)
@@ -378,16 +387,16 @@ const houses = computed(() => {
   const asc = String(reportData.value.ascendant || 'votre ascendant')
   return [
     { index: 1, title: 'Identité', description: `Avec votre ascendant en ${asc}, votre maniere d\'entrer en relation est marquée par cette energie.`, locked: false },
-    { index: 2, title: 'Valeurs et ressources', description: 'Votre rapport a l argent et a vos talents naturels.', locked: true },
-    { index: 3, title: 'Communication', description: 'Votre facon de penser, d apprendre et d echanger.', locked: true },
-    { index: 4, title: 'Foyer et racines', description: 'Votre base emotionnelle et vos besoins de securite.', locked: true },
-    { index: 5, title: 'Creativité et amour', description: 'Expression de soi, joie et elan du coeur.', locked: true },
+    { index: 2, title: 'Valeurs et ressources', description: 'Votre rapport à l\'argent et à vos talents naturels.', locked: true },
+    { index: 3, title: 'Communication', description: 'Votre facon de penser, d\'apprendre et d\'echanger.', locked: true },
+    { index: 4, title: 'Foyer et racines', description: 'Votre base émotionnelle et vos besoins de securité.', locked: true },
+    { index: 5, title: 'Creativité et amour', description: 'Expression de soi, joie et élan du coeur.', locked: true },
     { index: 6, title: 'Santé et travail', description: 'Organisation, habitudes et sens du service.', locked: true },
     { index: 7, title: 'Partenariats', description: 'Dynamique de couple et collaborations majeures.', locked: true },
-    { index: 8, title: 'Transformations', description: 'Mues profondes, pouvoir personnel et intimite.', locked: true },
-    { index: 9, title: 'Vision et philosophie', description: 'Croyances, etudes et ouverture au monde.', locked: true },
-    { index: 10, title: 'Carrière et mission', description: 'Direction de vie et realisation publique.', locked: true },
-    { index: 11, title: 'Amitiés et projets', description: 'Reseaux et ideal collectif.', locked: true },
+    { index: 8, title: 'Transformations', description: 'Mues profondes, pouvoir personnel et intimité.', locked: true },
+    { index: 9, title: 'Vision et philosophie', description: 'Croyances, études et ouverture au monde.', locked: true },
+    { index: 10, title: 'Carrière et mission', description: 'Direction de vie et réalisation publique.', locked: true },
+    { index: 11, title: 'Amitiés et projets', description: 'Réseaux et ideal collectif.', locked: true },
     { index: 12, title: 'Inconscient', description: 'Monde interieur, intuition et retrait.', locked: true },
   ]
 })
@@ -450,7 +459,7 @@ async function downloadPreviewPdf() {
     const url = window.URL.createObjectURL(blob)
     const anchor = document.createElement('a')
     anchor.href = url
-    anchor.download = `apercu-theme-${firstName.value || 'stellara'}.pdf`
+    anchor.download = `${props.isPremium ? 'rapport-complet' : 'apercu-theme'}-${firstName.value || 'stellara'}.pdf`
     document.body.appendChild(anchor)
     anchor.click()
     document.body.removeChild(anchor)

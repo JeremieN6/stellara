@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import { and, count, desc, eq, sql } from 'drizzle-orm'
 import { affiliateClicks, affiliates, affiliateSales } from '../../db/schema'
 import { getDbOrThrow } from './db'
@@ -41,6 +42,7 @@ export async function trackAffiliateClick(slug: string, referrer?: string | null
 export async function createAffiliateSaleFromCheckout(payload: {
   affiliateId: string
   stripeSessionId: string
+  stripeSubscriptionId?: string | null
   amountCents: number
   productType: string
 }) {
@@ -61,6 +63,8 @@ export async function createAffiliateSaleFromCheckout(payload: {
       id: randomUUID(),
       affiliateId: affiliate.id,
       stripeSessionId: payload.stripeSessionId,
+      stripeSubscriptionId: payload.stripeSubscriptionId || null,
+      recurrenceCount: 1,
       amountCents: payload.amountCents,
       commissionCents,
       productType: payload.productType,
@@ -71,6 +75,105 @@ export async function createAffiliateSaleFromCheckout(payload: {
     })
 
   return { created: true, commissionCents }
+}
+
+function addMonths(baseDate: Date, months: number): Date {
+  const date = new Date(baseDate)
+  date.setMonth(date.getMonth() + months)
+  return date
+}
+
+function resolveRecurringWindowMonths(): number {
+  const config = useRuntimeConfig()
+  const raw = Number(config.affiliateRecurringWindowMonths || 6)
+  if (!Number.isFinite(raw)) return 6
+  return Math.min(24, Math.max(1, Math.floor(raw)))
+}
+
+export async function createAffiliateRecurringSaleFromInvoice(payload: {
+  stripeInvoiceId: string
+  stripeSubscriptionId: string
+  amountCents: number
+  issuedAt?: Date | null
+  productType?: string
+}) {
+  if (!payload.stripeInvoiceId || !payload.stripeSubscriptionId || payload.amountCents <= 0) {
+    return { created: false, reason: 'invalid_payload' }
+  }
+
+  const db = getDbOrThrow()
+
+  const [existingInvoiceSale] = await db
+    .select({ id: affiliateSales.id })
+    .from(affiliateSales)
+    .where(eq(affiliateSales.stripeInvoiceId, payload.stripeInvoiceId))
+    .limit(1)
+
+  if (existingInvoiceSale) {
+    return { created: false, reason: 'already_exists' }
+  }
+
+  const [firstSale] = await db
+    .select({
+      affiliateId: affiliateSales.affiliateId,
+      createdAt: affiliateSales.createdAt,
+    })
+    .from(affiliateSales)
+    .where(eq(affiliateSales.stripeSubscriptionId, payload.stripeSubscriptionId))
+    .orderBy(affiliateSales.createdAt)
+    .limit(1)
+
+  if (!firstSale) {
+    return { created: false, reason: 'missing_subscription_attribution' }
+  }
+
+  const recurringWindowMonths = resolveRecurringWindowMonths()
+  const windowEnd = addMonths(firstSale.createdAt, recurringWindowMonths)
+  const referenceDate = payload.issuedAt || new Date()
+
+  if (referenceDate > windowEnd) {
+    return { created: false, reason: 'outside_commission_window' }
+  }
+
+  const [affiliate] = await db
+    .select({ id: affiliates.id, commissionRate: affiliates.commissionRate })
+    .from(affiliates)
+    .where(eq(affiliates.id, firstSale.affiliateId))
+    .limit(1)
+
+  if (!affiliate) {
+    return { created: false, reason: 'affiliate_not_found' }
+  }
+
+  const [recurrenceRow] = await db
+    .select({ count: count(affiliateSales.id) })
+    .from(affiliateSales)
+    .where(and(
+      eq(affiliateSales.stripeSubscriptionId, payload.stripeSubscriptionId),
+      eq(affiliateSales.status, 'confirmed'),
+      sql`${affiliateSales.stripeInvoiceId} IS NOT NULL`,
+    ))
+
+  const recurrenceCount = Number(recurrenceRow?.count || 0) + 1
+  const commissionCents = Math.round(payload.amountCents * affiliate.commissionRate)
+
+  await db
+    .insert(affiliateSales)
+    .values({
+      id: randomUUID(),
+      affiliateId: affiliate.id,
+      stripeSessionId: null,
+      stripeSubscriptionId: payload.stripeSubscriptionId,
+      stripeInvoiceId: payload.stripeInvoiceId,
+      recurrenceCount,
+      amountCents: payload.amountCents,
+      commissionCents,
+      productType: payload.productType || 'orbite_premium',
+      status: 'confirmed',
+    })
+    .onConflictDoNothing({ target: affiliateSales.stripeInvoiceId })
+
+  return { created: true, commissionCents, recurrenceCount }
 }
 
 export async function getAffiliatePublicDashboard(slug: string) {

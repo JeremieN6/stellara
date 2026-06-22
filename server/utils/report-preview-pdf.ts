@@ -105,7 +105,7 @@ export function buildPreviewPdfBuffer(payload: PreviewPdfPayload): Buffer {
   const summary = toAscii(payload.summary || 'Resume indisponible.')
 
   const lines = [
-    `Apercu du theme de ${firstName}`,
+    `Aperçu du theme de ${firstName}`,
     `Date de naissance: ${birthDate}`,
     `Ville: ${city}`,
     `Soleil: ${sunSign} | Lune: ${moonSign} | Ascendant: ${ascendant}`,

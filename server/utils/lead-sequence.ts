@@ -61,11 +61,11 @@ const SEQUENCE_TEMPLATES: SequenceTemplate[] = [
     subject: (contact) => `Ton theme natal t'attend, ${normalizeName(contact.firstName)}`,
     text: (contact) => {
       const firstName = normalizeName(contact.firstName)
-      return `${firstName},\n\nTon apercu est pret. Tu peux retrouver ton rapport tronque sur Stellara et reprendre la lecture la ou tu t'es arrete(e).\n\nCe que tu as deja: Soleil, Lune, Ascendant, premiere maison et resume personnalise.\n\nA tres vite,\nStellara`
+      return `${firstName},\n\nTon aperçu est pret. Tu peux retrouver ton rapport tronque sur Stellara et reprendre la lecture la ou tu t'es arrete(e).\n\nCe que tu as deja: Soleil, Lune, Ascendant, premiere maison et resume personnalise.\n\nA tres vite,\nStellara`
     },
     html: (contact) => {
       const firstName = normalizeName(contact.firstName)
-      return `<p>Bonjour ${firstName},</p><p>Ton apercu est pret. Tu peux retrouver ton rapport tronque sur Stellara et reprendre la lecture la ou tu t'es arrete(e).</p><p>Ce que tu as deja: Soleil, Lune, Ascendant, premiere maison et resume personnalise.</p><p>A tres vite,<br>Stellara</p>`
+      return `<p>Bonjour ${firstName},</p><p>Ton aperçu est pret. Tu peux retrouver ton rapport tronque sur Stellara et reprendre la lecture la ou tu t'es arrete(e).</p><p>Ce que tu as deja: Soleil, Lune, Ascendant, premiere maison et resume personnalise.</p><p>A tres vite,<br>Stellara</p>`
     },
   },
   {
@@ -87,8 +87,8 @@ const SEQUENCE_TEMPLATES: SequenceTemplate[] = [
     templateKey: 'houses-teaser',
     offsetDays: 3,
     subject: () => 'Le placement que tout le monde ignore dans son theme',
-    text: () => `La plupart des gens regardent seulement leur signe solaire. Pourtant, les maisons astrologiques racontent ou se jouent concretement tes enjeux: travail, couple, argent, vocation.\n\nTon apercu n'en montre qu'une partie. Le rapport complet decode les 12 maisons.\n\nDebloquer la lecture complete: ${getCheckoutLink()}`,
-    html: () => `<p>La plupart des gens regardent seulement leur signe solaire. Pourtant, les maisons astrologiques racontent ou se jouent concretement tes enjeux: travail, couple, argent, vocation.</p><p>Ton apercu n'en montre qu'une partie. Le rapport complet decode les 12 maisons.</p><p><a href="${getCheckoutLink()}">Debloquer la lecture complete</a></p>`,
+    text: () => `La plupart des gens regardent seulement leur signe solaire. Pourtant, les maisons astrologiques racontent ou se jouent concretement tes enjeux: travail, couple, argent, vocation.\n\nTon aperçu n'en montre qu'une partie. Le rapport complet decode les 12 maisons.\n\nDebloquer la lecture complete: ${getCheckoutLink()}`,
+    html: () => `<p>La plupart des gens regardent seulement leur signe solaire. Pourtant, les maisons astrologiques racontent ou se jouent concretement tes enjeux: travail, couple, argent, vocation.</p><p>Ton aperçu n'en montre qu'une partie. Le rapport complet decode les 12 maisons.</p><p><a href="${getCheckoutLink()}">Debloquer la lecture complete</a></p>`,
   },
   {
     step: 3,

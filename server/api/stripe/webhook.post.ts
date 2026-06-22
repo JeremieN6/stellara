@@ -1,9 +1,9 @@
 import { createHmac, timingSafeEqual } from 'node:crypto'
 import { and, eq } from 'drizzle-orm'
-import { invoices, plans, subscriptions, users } from '../../../db/schema'
+import { invoices, plans, reports, subscriptions, users } from '../../../db/schema'
 import { getDbOrThrow } from '../../utils/db'
 import { markLeadAsConvertedByEmail } from '../../utils/lead-sequence'
-import { createAffiliateSaleFromCheckout } from '../../utils/affiliate'
+import { createAffiliateRecurringSaleFromInvoice, createAffiliateSaleFromCheckout } from '../../utils/affiliate'
 
 type StripeEvent = {
   type: string
@@ -213,11 +213,25 @@ async function handleCheckoutCompleted(object: Record<string, unknown>) {
   const metadata = (object.metadata as Record<string, unknown> | undefined) || {}
   const affiliateId = getString(metadata.affiliateId)
   const productType = getString(metadata.productType) || 'rapport_complet'
+  const reportId = getString(metadata.reportId)
+
+  if (reportId && stripeSessionId) {
+    const db = getDbOrThrow()
+    await db
+      .update(reports)
+      .set({
+        isPremium: true,
+        stripeSessionId,
+        email: email || undefined,
+      })
+      .where(eq(reports.id, reportId))
+  }
 
   if (affiliateId && stripeSessionId && amountTotal > 0) {
     await createAffiliateSaleFromCheckout({
       affiliateId,
       stripeSessionId,
+      stripeSubscriptionId,
       amountCents: amountTotal,
       productType,
     })
@@ -266,16 +280,30 @@ async function handleInvoicePaid(object: Record<string, unknown>) {
   const stripeInvoiceId = getString(object.id)
   if (!stripeInvoiceId) return
 
+  const stripeSubscriptionId = getString(object.subscription)
+  const amountPaidCents = Number.isFinite(Number(object.amount_paid)) ? Number(object.amount_paid) : null
+  const issuedAt = fromUnix(object.created)
+
   await upsertInvoice({
     stripeInvoiceId,
     stripeCustomerId: getString(object.customer),
-    stripeSubscriptionId: getString(object.subscription),
-    amountPaidCents: Number.isFinite(Number(object.amount_paid)) ? Number(object.amount_paid) : null,
+    stripeSubscriptionId,
+    amountPaidCents,
     currency: getString(object.currency),
     status: getString(object.status),
     hostedInvoiceUrl: getString(object.hosted_invoice_url),
-    issuedAt: fromUnix(object.created),
+    issuedAt,
   })
+
+  if (stripeSubscriptionId && amountPaidCents && amountPaidCents > 0) {
+    await createAffiliateRecurringSaleFromInvoice({
+      stripeInvoiceId,
+      stripeSubscriptionId,
+      amountCents: amountPaidCents,
+      issuedAt,
+      productType: 'orbite_premium',
+    })
+  }
 }
 
 async function handleSubscriptionDeleted(object: Record<string, unknown>) {
@@ -296,10 +324,19 @@ async function handleSubscriptionDeleted(object: Record<string, unknown>) {
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig(event)
-  const secret = (config.stripeWebhookSecret || '').trim()
+  const configuredSecrets = [
+    String(config.stripeWebhookSecret || ''),
+    String(config.stripeWebhookSecrets || ''),
+  ]
+    .flatMap((chunk) => chunk.split(/[\s,]+/))
+    .map((secret) => secret.trim())
+    .filter(Boolean)
 
-  if (!secret) {
-    throw createError({ statusCode: 500, statusMessage: 'STRIPE_WEBHOOK_SECRET is not configured' })
+  if (configuredSecrets.length === 0) {
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'STRIPE_WEBHOOK_SECRET / STRIPE_WEBHOOK_SECRETS is not configured',
+    })
   }
 
   const signatureHeader = getHeader(event, 'stripe-signature')
@@ -312,7 +349,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'Missing request body' })
   }
 
-  const isValid = verifyStripeSignature(rawBody, signatureHeader, secret)
+  const isValid = configuredSecrets.some((secret) => verifyStripeSignature(rawBody, signatureHeader, secret))
   if (!isValid) {
     throw createError({ statusCode: 400, statusMessage: 'Invalid Stripe signature' })
   }

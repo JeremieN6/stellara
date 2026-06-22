@@ -37,6 +37,8 @@ export default defineNuxtConfig({
     openaiApiKey: process.env.OPENAI_API_KEY || '',
     stripeSecretKey: process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SK || '',
     stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
+    stripeWebhookSecrets: process.env.STRIPE_WEBHOOK_SECRETS || '',
+    affiliateRecurringWindowMonths: process.env.AFFILIATE_RECURRING_WINDOW_MONTHS || '6',
     stripePriceId: process.env.STRIPE_PRICE_ID || '',
       stripePriceIdMonthly: process.env.STRIPE_PRICE_ID_MONTHLY || '',
       stripePriceIdYearly: process.env.STRIPE_PRICE_ID_YEARLY || '',

@@ -28,7 +28,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, useHead } from '#imports'
+import { onMounted, useHead, navigateTo } from '#imports'
 import { useReportStore } from '~/stores/report'
 
 useHead({ title: 'Paiement réussi — Stellara' })
@@ -41,14 +41,28 @@ function unlock() {
 }
 
 onMounted(() => {
-  const email = typeof route.query.email === 'string' ? route.query.email : ''
+  reportStore.unlockPremium()
 
-  if (!email) {
-    reportStore.unlockPremium()
-    return
+  const email = typeof route.query.email === 'string' ? route.query.email : ''
+  const reportId = typeof route.query.report_id === 'string' ? route.query.report_id : ''
+
+  if (email) {
+    reportStore.setUserEmail(email)
+    reportStore.syncPremiumStatusFromServer(email)
   }
 
-  reportStore.setUserEmail(email)
-  reportStore.syncPremiumStatusFromServer(email)
+  if (reportId && reportStore.reportData) {
+    const currentReportId = String(reportStore.reportData.reportId || '').trim()
+    if (!currentReportId) {
+      reportStore.setReportData({
+        ...reportStore.reportData,
+        reportId,
+      })
+    }
+  }
+
+  setTimeout(() => {
+    navigateTo('/rapport', { replace: true })
+  }, 800)
 })
 </script>

@@ -12,6 +12,18 @@ function readBillingInterval(value: unknown): BillingInterval {
   return value === 'yearly' ? 'yearly' : 'monthly'
 }
 
+function resolveRequestOrigin(event: Parameters<typeof defineEventHandler>[0], fallbackOrigin: string): string {
+  const forwardedProto = String(getHeader(event, 'x-forwarded-proto') || '').trim()
+  const forwardedHost = String(getHeader(event, 'x-forwarded-host') || '').trim()
+  const host = String(getHeader(event, 'host') || '').trim()
+
+  const originHost = forwardedHost || host
+  if (!originHost) return fallbackOrigin
+
+  const protocol = forwardedProto || (originHost.includes('localhost') || originHost.startsWith('127.0.0.1') ? 'http' : 'https')
+  return `${protocol}://${originHost}`.replace(/\/$/, '')
+}
+
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig(event)
   const stripe = getStripeOrThrow(event)
@@ -39,8 +51,17 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const siteUrl = String(config.public.appUrl || config.public.siteUrl || 'http://localhost:3000').replace(/\/$/, '')
-  const successUrl = `${siteUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`
+  const configuredSiteUrl = String(config.public.appUrl || config.public.siteUrl || 'http://localhost:3000').replace(/\/$/, '')
+  const siteUrl = resolveRequestOrigin(event, configuredSiteUrl)
+
+  const reportId = String(query.reportId || '').trim()
+  const email = String(query.email || '').trim().toLowerCase()
+  const successParams = new URLSearchParams({ session_id: '{CHECKOUT_SESSION_ID}' })
+
+  if (reportId) successParams.set('report_id', reportId)
+  if (email) successParams.set('email', email)
+
+  const successUrl = `${siteUrl}/checkout/success?${successParams.toString()}`
   const cancelUrl = `${siteUrl}/rapport`
 
   const refSlug = getCookie(event, AFFILIATE_COOKIE_NAME)
@@ -60,6 +81,8 @@ export default defineEventHandler(async (event) => {
       billingInterval,
       affiliateId: affiliate?.id || '',
       affiliateSlug: affiliate?.slug || '',
+      reportId,
+      email,
     },
   })
 
