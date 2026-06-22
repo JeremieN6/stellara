@@ -35,6 +35,8 @@ export default defineNuxtConfig({
     // Server-only
     databaseUrl: process.env.DATABASE_URL || '',
     openaiApiKey: process.env.OPENAI_API_KEY || '',
+    brevoApiKey: process.env.BREVO_API_KEY || '',
+    brevoListIdLeads: process.env.BREVO_LIST_ID_LEADS || '',
     stripeSecretKey: process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SK || '',
     stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
     stripeWebhookSecrets: process.env.STRIPE_WEBHOOK_SECRETS || '',

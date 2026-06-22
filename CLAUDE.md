@@ -58,3 +58,5 @@
 > 2026-05-21: Ajout d'un acces discret a l'horoscope du jour dans le header et le footer, avec endpoint Nuxt dedie, cache journalier et fallback IA. La suite a brainstormer est un bundle premium / abonnement pour un horoscope plus detaille reserve aux utilisateurs payants.
 >
 > 2026-05-21: Lancement concret de la migration full JS. Mise en place du socle DB JS dans Nitro, ajout des tables core (users/plans/subscriptions/invoices), nouveaux endpoints account/subscription, et webhook Stripe cote Nuxt avec verification de signature. Prochaine etape: migrations Drizzle + branchement UI premium sur statut abonnement serveur.
+>
+> 2026-06-22: Integration Brevo ajoutee sur la capture d'email du rapport. Le contact est synchronise avec PRENOM/SIGNE_ASTRO/LUNE/ASCENDANT et ajoute a la liste d'automation, via un helper serveur non bloquant avec timeout et fallback silencieux.

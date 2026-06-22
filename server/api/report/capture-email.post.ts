@@ -1,5 +1,6 @@
 import { eq } from 'drizzle-orm'
 import { reports } from '../../../db/schema'
+import { syncContactToBrevo } from '../../utils/brevo'
 import { getDbIfConfigured } from '../../utils/db'
 import { buildPreviewPdfBuffer, type PreviewPdfPayload } from '../../utils/report-preview-pdf'
 import { sendPreviewEmail } from '../../utils/mailer'
@@ -51,6 +52,13 @@ export default defineEventHandler(async (event) => {
         moonSign,
         reportId: reportId || null,
       })
+      await syncContactToBrevo({
+        email,
+        prenom: body.previewPayload?.firstName ?? 'vous',
+        signeAstro: body.previewPayload?.sunSign ?? 'Non calculé',
+        lune: body.previewPayload?.moonSign ?? 'Non calculé',
+        ascendant: body.previewPayload?.ascendant ?? 'Non calculé',
+      })
       await runLeadSequenceBatch(20)
     } catch (sequenceError) {
       console.error('[report/capture-email] lead sequence upsert failed (fallback path):', sequenceError)
@@ -79,6 +87,13 @@ export default defineEventHandler(async (event) => {
       firstName: body.previewPayload?.firstName ?? null,
       moonSign,
       reportId,
+    })
+    await syncContactToBrevo({
+      email,
+      prenom: body.previewPayload?.firstName ?? 'vous',
+      signeAstro: body.previewPayload?.sunSign ?? 'Non calculé',
+      lune: body.previewPayload?.moonSign ?? 'Non calculé',
+      ascendant: body.previewPayload?.ascendant ?? 'Non calculé',
     })
     await runLeadSequenceBatch(20)
   } catch (sequenceError) {
