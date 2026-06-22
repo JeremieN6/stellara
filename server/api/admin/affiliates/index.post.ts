@@ -1,10 +1,13 @@
-import { randomBytes } from 'node:crypto'
 import { eq } from 'drizzle-orm'
 import { affiliates } from '../../../../db/schema'
 import { assertAdminAccess } from '../../../utils/admin-auth'
 import { getDbOrThrow } from '../../../utils/db'
+import { buildAffiliatePrivateDashboardUrl, generateAffiliateSecretToken } from '../../../utils/affiliate'
 import { normalizeSlug } from '../../../utils/affiliate'
-import { sendPreviewEmail } from '../../../utils/mailer'
+import {
+  recordAffiliateAdminAction,
+  sendAffiliatePrivateLinkEmail,
+} from '../../../utils/affiliate-admin'
 import { getStripeOrThrow } from '../../../utils/stripe-client'
 
 type CreateAffiliateRequest = {
@@ -25,10 +28,6 @@ function normalizePromoCode(input: string): string {
 
 function assertEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-}
-
-function canAttemptEmailDelivery(email: string): boolean {
-  return assertEmail(email)
 }
 
 export default defineEventHandler(async (event) => {
@@ -81,7 +80,7 @@ export default defineEventHandler(async (event) => {
     name: `Affiliation ${slug}`,
   })
 
-  const secretToken = randomBytes(32).toString('hex')
+  const secretToken = generateAffiliateSecretToken()
 
   const [affiliate] = await db.insert(affiliates).values({
     name,
@@ -94,39 +93,55 @@ export default defineEventHandler(async (event) => {
     active: true,
   }).returning()
 
-  const runtimeConfig = useRuntimeConfig(event)
-  const siteUrl = String(runtimeConfig.public.siteUrl || runtimeConfig.public.appUrl || '').replace(/\/$/, '')
-  const privateDashboardUrl = `${siteUrl}/affilie/${slug}?token=${secretToken}`
+  const privateDashboardUrl = buildAffiliatePrivateDashboardUrl(slug, secretToken)
+
+  await recordAffiliateAdminAction({
+    affiliateId: affiliate.id,
+    action: 'affiliate_created',
+    status: 'success',
+    details: {
+      privateDashboardUrl,
+      buyerDiscountPercent: requestedBuyerDiscountPercent,
+    },
+  })
 
   let emailDelivery = {
     sent: false,
     reason: 'not_attempted',
   }
 
-  if (canAttemptEmailDelivery(email)) {
-    emailDelivery = await sendPreviewEmail({
-      to: email,
-      subject: `Ton accès influenceur Stellara pour ${name}`,
-      text: [
-        `Bonjour ${name},`,
-        '',
-        'Ton tableau de bord influenceur est prêt :',
-        privateDashboardUrl,
-        '',
-        'Conserve ce lien précieusement, il est unique et privé.',
-      ].join('\n'),
-      html: `
-        <p>Bonjour ${name},</p>
-        <p>Ton tableau de bord influenceur Stellara est prêt.</p>
-        <p><a href="${privateDashboardUrl}">Ouvrir mon tableau de bord privé</a></p>
-        <p>Conserve ce lien précieusement, il est unique et privé.</p>
-      `,
+  try {
+    emailDelivery = await sendAffiliatePrivateLinkEmail({
+      email,
+      name,
+      privateDashboardUrl,
     })
-  } else {
+
+    await recordAffiliateAdminAction({
+      affiliateId: affiliate.id,
+      action: emailDelivery.sent ? 'invite_sent' : 'invite_failed',
+      status: emailDelivery.sent ? 'success' : 'failed',
+      details: {
+        reason: emailDelivery.reason || null,
+        privateDashboardUrl,
+      },
+    })
+  } catch (error) {
+    console.error('[admin/affiliates] invite email failed:', error)
     emailDelivery = {
       sent: false,
-      reason: 'invalid_email_format',
+      reason: 'smtp_send_failed',
     }
+
+    await recordAffiliateAdminAction({
+      affiliateId: affiliate.id,
+      action: 'invite_failed',
+      status: 'failed',
+      details: {
+        reason: emailDelivery.reason,
+        privateDashboardUrl,
+      },
+    })
   }
 
   return {

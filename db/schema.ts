@@ -157,6 +157,20 @@ export const affiliates = pgTable('affiliates', {
   activeIdx: index('affiliates_active_idx').on(table.active),
 }))
 
+export const affiliateAdminActions = pgTable('affiliate_admin_actions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  affiliateId: uuid('affiliate_id').notNull().references(() => affiliates.id, { onDelete: 'cascade' }),
+  actor: text('actor').default('admin').notNull(),
+  action: text('action').notNull(),
+  status: text('status').notNull(),
+  details: text('details'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => ({
+  affiliateIdx: index('affiliate_admin_actions_affiliate_idx').on(table.affiliateId),
+  actionIdx: index('affiliate_admin_actions_action_idx').on(table.action),
+  createdAtIdx: index('affiliate_admin_actions_created_at_idx').on(table.createdAt),
+}))
+
 export const affiliateClicks = pgTable('affiliate_clicks', {
   id: uuid('id').primaryKey().defaultRandom(),
   affiliateId: uuid('affiliate_id').notNull().references(() => affiliates.id, { onDelete: 'cascade' }),

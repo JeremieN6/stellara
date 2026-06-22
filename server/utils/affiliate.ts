@@ -1,6 +1,6 @@
-import { randomUUID } from 'node:crypto'
+import { randomBytes, randomUUID } from 'node:crypto'
 import { and, count, desc, eq, sql } from 'drizzle-orm'
-import { affiliateClicks, affiliates, affiliateSales } from '../../db/schema'
+import { affiliateAdminActions, affiliateClicks, affiliates, affiliateSales } from '../../db/schema'
 import { getDbOrThrow } from './db'
 
 export const AFFILIATE_COOKIE_NAME = 'stellara_ref'
@@ -10,6 +10,10 @@ export function normalizeSlug(slug: string): string {
     .trim()
     .toLowerCase()
     .replace(/[^a-z0-9_-]/g, '')
+}
+
+export function generateAffiliateSecretToken(): string {
+  return randomBytes(32).toString('hex')
 }
 
 export async function findActiveAffiliateBySlug(slug: string) {
@@ -176,6 +180,30 @@ export async function createAffiliateRecurringSaleFromInvoice(payload: {
   return { created: true, commissionCents, recurrenceCount }
 }
 
+export function buildAffiliatePrivateDashboardUrl(slug: string, secretToken: string): string {
+  const runtimeConfig = useRuntimeConfig()
+  const siteUrl = String(runtimeConfig.public.siteUrl || runtimeConfig.public.appUrl || '').replace(/\/$/, '')
+  return `${siteUrl}/affilie/${slug}?token=${secretToken}`
+}
+
+export async function getAffiliateInviteStatus(affiliateId: string): Promise<'sent' | 'failed' | 'never_sent'> {
+  const db = getDbOrThrow()
+
+  const [latestInvite] = await db
+    .select({ action: affiliateAdminActions.action, status: affiliateAdminActions.status })
+    .from(affiliateAdminActions)
+    .where(and(
+      eq(affiliateAdminActions.affiliateId, affiliateId),
+      sql`${affiliateAdminActions.action} IN ('invite_sent', 'invite_failed', 'invite_resent')`,
+    ))
+    .orderBy(desc(affiliateAdminActions.createdAt))
+    .limit(1)
+
+  if (!latestInvite) return 'never_sent'
+  if (latestInvite.action === 'invite_failed' || latestInvite.status === 'failed') return 'failed'
+  return 'sent'
+}
+
 export async function getAffiliatePublicDashboard(slug: string) {
   const db = getDbOrThrow()
   const affiliate = await findActiveAffiliateBySlug(slug)
@@ -278,7 +306,8 @@ export async function getAdminAffiliatesDashboard() {
       commissionRate: row.commissionRate,
       active: row.active,
       createdAt: row.createdAt,
-      privateDashboardUrl: `${siteUrl}/affilie/${row.slug}?token=${row.secretToken}`,
+      privateDashboardUrl: buildAffiliatePrivateDashboardUrl(row.slug, row.secretToken),
+      inviteStatus: await getAffiliateInviteStatus(row.id),
       totalClicks: Number(clickRow[0]?.totalClicks || 0),
       confirmedSales: Number(salesRow[0]?.confirmedSales || 0),
       totalCommissions: Number(salesRow[0]?.totalCommissions || 0),
