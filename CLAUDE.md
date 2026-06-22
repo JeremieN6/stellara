@@ -62,3 +62,5 @@
 > 2026-06-22: Integration Brevo ajoutee sur la capture d'email du rapport. Le contact est synchronise avec PRENOM/SIGNE_ASTRO/LUNE/ASCENDANT et ajoute a la liste d'automation, via un helper serveur non bloquant avec timeout et fallback silencieux.
 >
 > 2026-06-23: Correctif persistance prenom. Lors de /api/report/capture-email, le prenom est maintenant normalise puis upsert dans users_js.first_name (en plus de reports et lead_magnet_contacts), pour alimenter correctement les attributs de campagne email.
+>
+> 2026-06-23 (suite): Patch decouplage Brevo. Brevo est maintenant appelé immédiatement et indépendamment du statut DB, reportId ou lead_magnet_contacts. Front retire la dépendance reportId avant d'appeler capture-email. Garantit que Brevo reçoit le contact même en cas d'indisponibilité DB.

@@ -350,8 +350,6 @@ async function handleCaptureEmail(email: string) {
     summary: String(reportData.summary || ''),
   }
 
-  if (!reportId) return
-
   try {
     const response = await $fetch('/api/report/capture-email', {
       method: 'POST',

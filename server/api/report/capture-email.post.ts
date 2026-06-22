@@ -48,6 +48,19 @@ export default defineEventHandler(async (event) => {
 
   const normalizedFirstName = normalizeFirstName(body.previewPayload?.firstName, reportFirstName)
 
+  // Always sync to Brevo first, independently of database availability
+  try {
+    await syncContactToBrevo({
+      email,
+      prenom: normalizedFirstName || 'vous',
+      signeAstro: body.previewPayload?.sunSign ?? 'Non calculé',
+      lune: body.previewPayload?.moonSign ?? 'Non calculé',
+      ascendant: body.previewPayload?.ascendant ?? 'Non calculé',
+    })
+  } catch (brevoError) {
+    console.error('[report/capture-email] brevo sync failed (non-blocking):', brevoError)
+  }
+
   if (!db || !reportId) {
     try {
       await upsertLeadMagnetContact({
@@ -55,13 +68,6 @@ export default defineEventHandler(async (event) => {
         firstName: normalizedFirstName,
         moonSign,
         reportId: reportId || null,
-      })
-      await syncContactToBrevo({
-        email,
-        prenom: normalizedFirstName || 'vous',
-        signeAstro: body.previewPayload?.sunSign ?? 'Non calculé',
-        lune: body.previewPayload?.moonSign ?? 'Non calculé',
-        ascendant: body.previewPayload?.ascendant ?? 'Non calculé',
       })
       await runLeadSequenceBatch(20)
     } catch (sequenceError) {
@@ -113,13 +119,6 @@ export default defineEventHandler(async (event) => {
       firstName: normalizedFirstName,
       moonSign,
       reportId,
-    })
-    await syncContactToBrevo({
-      email,
-      prenom: normalizedFirstName || 'vous',
-      signeAstro: body.previewPayload?.sunSign ?? 'Non calculé',
-      lune: body.previewPayload?.moonSign ?? 'Non calculé',
-      ascendant: body.previewPayload?.ascendant ?? 'Non calculé',
     })
     await runLeadSequenceBatch(20)
   } catch (sequenceError) {
