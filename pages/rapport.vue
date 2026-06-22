@@ -157,7 +157,7 @@ const step = ref(0)
 const calculating = ref(false)
 const unknownBirthTime = ref(false)
 
-onMounted(() => {
+onMounted(async () => {
   reportStore.initFromStorage()
 
   if (reportStore.reportData) {
@@ -165,7 +165,15 @@ onMounted(() => {
   }
 
   if (reportStore.userEmail) {
-    reportStore.syncPremiumStatusFromServer(reportStore.userEmail)
+    const restored = reportStore.reportData
+      ? true
+      : await reportStore.restoreLatestReportFromServer(reportStore.userEmail)
+
+    if (restored && reportStore.reportData) {
+      step.value = 2
+    }
+
+    await reportStore.syncPremiumStatusFromServer(reportStore.userEmail)
   }
 })
 

@@ -69,6 +69,7 @@ export default defineEventHandler(async (event) => {
 
   const session = await stripe.checkout.sessions.create({
     mode: productType === 'rapport_complet' ? 'payment' : 'subscription',
+    customer_email: email || undefined,
     line_items: [{
       price: selectedPriceId,
       quantity: 1,

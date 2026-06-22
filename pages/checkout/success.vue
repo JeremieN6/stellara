@@ -36,19 +36,44 @@ useHead({ title: 'Paiement réussi — Stellara' })
 const reportStore = useReportStore()
 const route = useRoute()
 
+type CheckoutSessionResponse = {
+  customerEmail: string | null
+  reportId: string | null
+}
+
 function unlock() {
   reportStore.unlockPremium()
 }
 
-onMounted(() => {
+onMounted(async () => {
   reportStore.unlockPremium()
 
-  const email = typeof route.query.email === 'string' ? route.query.email : ''
-  const reportId = typeof route.query.report_id === 'string' ? route.query.report_id : ''
+  let email = typeof route.query.email === 'string' ? route.query.email : ''
+  let reportId = typeof route.query.report_id === 'string' ? route.query.report_id : ''
+  const sessionId = typeof route.query.session_id === 'string' ? route.query.session_id : ''
+
+  if ((!email || !reportId) && sessionId) {
+    try {
+      const session = await $fetch('/api/stripe/checkout-session', {
+        query: { session_id: sessionId },
+      }) as CheckoutSessionResponse
+
+      if (!email && session.customerEmail) {
+        email = session.customerEmail
+      }
+
+      if (!reportId && session.reportId) {
+        reportId = session.reportId
+      }
+    } catch (error) {
+      console.error('[checkout/success] session lookup failed:', error)
+    }
+  }
 
   if (email) {
     reportStore.setUserEmail(email)
-    reportStore.syncPremiumStatusFromServer(email)
+    await reportStore.restoreLatestReportFromServer(email)
+    await reportStore.syncPremiumStatusFromServer(email)
   }
 
   if (reportId && reportStore.reportData) {

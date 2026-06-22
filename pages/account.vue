@@ -47,7 +47,7 @@
               </button>
             </div>
             <p class="mt-2 text-xs text-slate-500">
-              Utilise le même email que celui saisi lors du paiement Stripe.
+              Utilise le <strong>même email</strong> que celui saisi lors du paiement si tu a un compte premium ou que tu as déjà eu un rapport natale complet.
             </p>
           </form>
 
@@ -60,6 +60,21 @@
               <p class="text-xs uppercase tracking-[0.16em] text-slate-400">Renouvellement</p>
               <p class="mt-2 text-sm text-white">{{ renewalLabel }}</p>
             </div>
+          </div>
+
+          <div v-if="latestReport" class="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4">
+            <p class="text-xs uppercase tracking-[0.16em] text-slate-400">Dernier rapport sauvegarde</p>
+            <p class="mt-2 text-sm text-white">
+              {{ latestReport.firstName }} - {{ latestReport.sunSign }} / {{ latestReport.moonSign }} / {{ latestReport.ascendant }}
+            </p>
+            <p class="mt-1 text-xs text-slate-400">{{ latestReport.city }} - {{ latestReport.birthDate }}</p>
+            <button
+              type="button"
+              class="mt-4 rounded-full border border-white/20 bg-white/5 px-5 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-white transition-colors hover:bg-white/10"
+              @click="resumeLatestReport"
+            >
+              Reprendre mon rapport
+            </button>
           </div>
 
           <div class="mt-6 flex flex-wrap items-center gap-3">
@@ -123,12 +138,27 @@ type SubscriptionStatusResponse = {
   isPremium: boolean
 }
 
+type LatestReportResponse = {
+  isPremium: boolean
+  report: {
+    reportId: string
+    firstName: string
+    birthDate: string
+    city: string
+    sunSign: string
+    moonSign: string
+    ascendant: string
+    summary: string
+  } | null
+}
+
 const reportStore = useReportStore()
 
 const loading = ref(false)
 const errorMessage = ref('')
 const emailInput = ref('')
 const profile = ref<ProfileResponse | null>(null)
+const latestReport = ref<LatestReportResponse['report']>(null)
 
 const activeEmail = computed(() => reportStore.userEmail)
 
@@ -169,6 +199,19 @@ async function refreshAccount() {
 
     profile.value = profileData
     reportStore.setPremiumStatus(Boolean(statusData?.isPremium))
+
+    const latestReportResponse = await $fetch('/api/report/latest', {
+      query: { email },
+    }) as LatestReportResponse
+
+    latestReport.value = latestReportResponse.report
+
+    if (latestReportResponse.report) {
+      reportStore.setReportData(latestReportResponse.report)
+      if (latestReportResponse.isPremium) {
+        reportStore.setPremiumStatus(true)
+      }
+    }
   } catch (error) {
     console.error('[account] refresh failed:', error)
     errorMessage.value = 'Impossible de recuperer vos informations pour le moment.'
@@ -188,8 +231,19 @@ async function connectEmail() {
 function disconnect() {
   reportStore.clearSession()
   profile.value = null
+  latestReport.value = null
   emailInput.value = ''
   errorMessage.value = ''
+}
+
+async function resumeLatestReport() {
+  const restored = await reportStore.restoreLatestReportFromServer(activeEmail.value)
+  if (!restored) {
+    errorMessage.value = 'Aucun rapport sauvegarde n a ete retrouve pour cet email.'
+    return
+  }
+
+  await navigateTo('/rapport')
 }
 
 onMounted(async () => {

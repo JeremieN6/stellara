@@ -75,6 +75,32 @@ export const useReportStore = defineStore('report', {
       }
     },
 
+    async restoreLatestReportFromServer(email?: string) {
+      const targetEmail = (email || this.userEmail || '').trim().toLowerCase()
+      if (!targetEmail) return false
+
+      try {
+        const response = await $fetch<{
+          isPremium: boolean
+          report: Record<string, unknown> | null
+        }>('/api/report/latest', {
+          query: { email: targetEmail },
+        })
+
+        if (!response?.report) {
+          return false
+        }
+
+        this.setUserEmail(targetEmail)
+        this.setReportData(response.report)
+        this.setPremiumStatus(Boolean(response.isPremium))
+        return true
+      } catch (error) {
+        console.error('[report-store] latest report restore failed:', error)
+        return false
+      }
+    },
+
     initFromStorage() {
       if (import.meta.client) {
         this.isPremium = localStorage.getItem('Stellara_premium') === '1'
