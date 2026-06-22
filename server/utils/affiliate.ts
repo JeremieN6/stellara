@@ -58,6 +58,7 @@ export async function createAffiliateSaleFromCheckout(payload: {
   await db
     .insert(affiliateSales)
     .values({
+      id: randomUUID(),
       affiliateId: affiliate.id,
       stripeSessionId: payload.stripeSessionId,
       amountCents: payload.amountCents,
@@ -134,7 +135,16 @@ export async function getAdminAffiliatesDashboard() {
   const db = getDbOrThrow()
 
   const rows = await db
-    .select()
+    .select({
+      id: affiliates.id,
+      slug: affiliates.slug,
+      name: affiliates.name,
+      email: affiliates.email,
+      promoCode: affiliates.promoCode,
+      commissionRate: affiliates.commissionRate,
+      active: affiliates.active,
+      createdAt: affiliates.createdAt,
+    })
     .from(affiliates)
     .orderBy(desc(affiliates.createdAt))
 

@@ -1,5 +1,7 @@
 import type { H3Event } from 'h3'
 import { drizzle, type PostgresJsDatabase } from 'drizzle-orm/postgres-js'
+import { drizzle as drizzleNeonHttp } from 'drizzle-orm/neon-http'
+import { neon } from '@neondatabase/serverless'
 import postgres from 'postgres'
 import * as schema from '../../db/schema'
 
@@ -24,6 +26,14 @@ function isSupportedDatabaseUrl(databaseUrl: string): boolean {
 }
 
 function createDb(databaseUrl: string): Db {
+  if (/\.neon\.tech/i.test(databaseUrl)) {
+    const neonClient = neon(databaseUrl)
+    sqlClient = null
+    dbClient = drizzleNeonHttp(neonClient, { schema }) as Db
+    dbUrlCached = databaseUrl
+    return dbClient
+  }
+
   sqlClient = postgres(databaseUrl, {
     ssl: shouldUseSsl(databaseUrl) ? 'require' : undefined,
     max: 1,

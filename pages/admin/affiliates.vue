@@ -127,7 +127,7 @@ async function loadDashboard() {
     })
   } catch (error) {
     console.error('[admin/affiliates] load failed:', error)
-    errorMessage.value = 'Impossible de charger le dashboard affiliation.'
+    errorMessage.value = extractApiErrorMessage(error, 'Impossible de charger le dashboard affiliation.')
   } finally {
     loading.value = false
   }
@@ -140,19 +140,19 @@ async function createAffiliate() {
   createMessage.value = ''
 
   try {
-    const response = await $fetch<{ ok: boolean; affiliate: { slug: string } }>('/api/admin/affiliates', {
+    const response = await $fetch('/api/admin/affiliates', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${adminToken.value}`,
       },
       body: createForm,
-    })
+    }) as { ok: boolean; affiliate: { slug: string } }
 
     createMessage.value = `Affilie cree avec succes: ${response.affiliate.slug}`
     await loadDashboard()
   } catch (error) {
     console.error('[admin/affiliates] create failed:', error)
-    errorMessage.value = 'Creation impossible. Verifie les champs et l unicite slug/promo code.'
+    errorMessage.value = extractApiErrorMessage(error, 'Creation impossible. Verifie les champs et l unicite slug/promo code.')
   } finally {
     creating.value = false
   }
@@ -160,5 +160,19 @@ async function createAffiliate() {
 
 function formatMoney(cents: number): string {
   return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format((cents || 0) / 100)
+}
+
+function extractApiErrorMessage(error: unknown, fallback: string): string {
+  if (error && typeof error === 'object') {
+    const maybeError = error as {
+      data?: { statusMessage?: string; message?: string }
+      statusMessage?: string
+      message?: string
+    }
+
+    return maybeError.data?.statusMessage || maybeError.data?.message || maybeError.statusMessage || maybeError.message || fallback
+  }
+
+  return fallback
 }
 </script>
