@@ -164,7 +164,7 @@ export default defineEventHandler(async (event) => {
       sign,
       ...cached.payload,
       source: 'cache',
-      disclaimer: 'Contenu a visee de divertissement.',
+      disclaimer: 'Contenu a visée de divertissement.',
     }
   }
 
@@ -189,6 +189,6 @@ export default defineEventHandler(async (event) => {
     sign,
     ...payload,
     source,
-    disclaimer: 'Contenu a visee de divertissement.',
+    disclaimer: 'Contenu a visée de divertissement.',
   }
 })
