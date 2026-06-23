@@ -32,15 +32,24 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=yes ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
           set -euo pipefail
-          cd /srv/saas/stellara || exit 1
+          cd "${{ env.REMOTE_DIR }}" || exit 1
+
+          echo "[deploy] branch: $(git rev-parse --abbrev-ref HEAD)"
           git fetch --all --prune
           git reset --hard origin/main
+          # Keep env/config files but remove stale tracked and untracked artifacts.
+          git clean -fd -e .env -e .env.local -e ecosystem.config.cjs
+
+          echo "[deploy] commit: $(git rev-parse --short HEAD)"
           npm ci
-          rm -rf .output
+          rm -rf .nuxt .output
           npm run build
+
+          # Extra safety: ensure no stale process keeps old chunks in memory.
           if pm2 describe stellara > /dev/null 2>&1; then
-            pm2 reload stellara --update-env
+            pm2 restart stellara --update-env
           else
             pm2 start ecosystem.config.cjs
           fi
+          pm2 save
           EOF
