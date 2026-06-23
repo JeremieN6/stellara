@@ -29,51 +29,56 @@
             </div>
           </div>
 
-          <form class="mt-6" @submit.prevent="connectEmail">
-            <label class="mb-2 block text-xs uppercase tracking-[0.18em] text-slate-400">Email de compte</label>
-            <div class="flex flex-col gap-3 sm:flex-row">
-              <input
-                v-model="emailInput"
-                type="email"
-                class="form-input"
-                placeholder="votre@email.com"
-                required
-              />
+          <section class="mt-6">
+            <div class="inline-flex rounded-full border border-white/15 bg-white/5 p-1">
               <button
-                type="submit"
-                class="rounded-full border border-white/20 bg-white/5 px-5 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-white transition-colors hover:bg-white/10"
+                type="button"
+                class="rounded-full px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] transition-colors"
+                :class="accountEmailAction === 'update' ? 'bg-white/15 text-white' : 'text-slate-300 hover:text-white'"
+                @click="accountEmailAction = 'update'"
               >
-                Mettre a jour
+                Email compte
+              </button>
+              <button
+                type="button"
+                class="rounded-full px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] transition-colors"
+                :class="accountEmailAction === 'magic-link' ? 'bg-white/15 text-white' : 'text-slate-300 hover:text-white'"
+                @click="accountEmailAction = 'magic-link'"
+              >
+                Lien magique
               </button>
             </div>
-            <p class="mt-2 text-xs text-slate-500">
-              Utilise le <strong>même email</strong> que celui saisi lors du paiement si tu a un compte premium ou que tu as déjà eu un rapport natale complet.
-            </p>
-          </form>
 
-          <form class="mt-6" @submit.prevent="sendMagicLink">
-            <label class="mb-2 block text-xs uppercase tracking-[0.18em] text-slate-400">Connexion sécurisée</label>
-            <div class="flex flex-col gap-3 sm:flex-row">
-              <input
-                v-model="magicLinkEmailInput"
-                type="email"
-                class="form-input"
-                placeholder="email de paiement Stripe"
-                required
-              />
-              <button
-                type="submit"
-                class="rounded-full border border-white/20 bg-white/5 px-5 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-white transition-colors hover:bg-white/10"
-                :disabled="magicLinkLoading"
-                :class="magicLinkLoading ? 'cursor-not-allowed opacity-60' : ''"
-              >
-                {{ magicLinkLoading ? 'Envoi...' : 'Envoyer lien magique' }}
-              </button>
-            </div>
-            <p class="mt-2 text-xs text-slate-500">
-              Un lien de connexion sans mot de passe sera envoyé à cet email.
-            </p>
-          </form>
+            <form class="mt-4" @submit.prevent="submitEmailAction">
+              <label class="mb-2 block text-xs uppercase tracking-[0.18em] text-slate-400">
+                {{ accountEmailAction === 'update' ? 'Email de compte' : 'Connexion securisee' }}
+              </label>
+              <div class="flex flex-col gap-3 sm:flex-row">
+                <input
+                  v-model="emailInput"
+                  type="email"
+                  class="form-input"
+                  placeholder="votre@email.com"
+                  required
+                />
+                <button
+                  type="submit"
+                  class="rounded-full border border-white/20 bg-white/5 px-5 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-white transition-colors hover:bg-white/10"
+                  :disabled="magicLinkLoading"
+                  :class="magicLinkLoading ? 'cursor-not-allowed opacity-60' : ''"
+                >
+                  {{ accountEmailAction === 'update' ? 'Mettre a jour' : (magicLinkLoading ? 'Envoi...' : 'Envoyer lien magique') }}
+                </button>
+              </div>
+              <p class="mt-2 text-xs text-slate-500">
+                {{
+                  accountEmailAction === 'update'
+                    ? 'Utilise le meme email que celui saisi lors du paiement si tu as un compte premium ou un rapport natal complet.'
+                    : 'Un lien de connexion sans mot de passe sera envoye a cet email.'
+                }}
+              </p>
+            </form>
+          </section>
 
           <div class="mt-8 grid gap-4 sm:grid-cols-2">
             <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
@@ -229,7 +234,7 @@ const reportStore = useReportStore()
 const loading = ref(false)
 const errorMessage = ref('')
 const emailInput = ref('')
-const magicLinkEmailInput = ref('')
+const accountEmailAction = ref<'update' | 'magic-link'>('update')
 const magicLinkLoading = ref(false)
 const profile = ref<ProfileResponse | null>(null)
 const latestReport = ref<LatestReportResponse['report']>(null)
@@ -304,14 +309,25 @@ async function connectEmail() {
   const normalized = emailInput.value.trim().toLowerCase()
   if (!normalized) return
 
+  emailInput.value = normalized
   reportStore.setUserEmail(normalized)
   await refreshAccount()
 }
 
+async function submitEmailAction() {
+  if (accountEmailAction.value === 'update') {
+    await connectEmail()
+    return
+  }
+
+  await sendMagicLink()
+}
+
 async function sendMagicLink() {
-  const email = magicLinkEmailInput.value.trim().toLowerCase()
+  const email = emailInput.value.trim().toLowerCase()
   if (!email) return
 
+  emailInput.value = email
   magicLinkLoading.value = true
   errorMessage.value = ''
 
@@ -341,7 +357,7 @@ function disconnect() {
   latestReport.value = null
   reportsHistory.value = []
   emailInput.value = ''
-  magicLinkEmailInput.value = ''
+  accountEmailAction.value = 'update'
   errorMessage.value = ''
 
   $fetch('/api/auth/logout', { method: 'POST' }).catch((error) => {
@@ -435,7 +451,6 @@ onMounted(async () => {
   }
 
   emailInput.value = reportStore.userEmail
-  magicLinkEmailInput.value = reportStore.userEmail
 
   if (reportStore.userEmail) {
     await refreshAccount()
