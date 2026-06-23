@@ -41,15 +41,33 @@ jobs:
           git clean -fd -e .env -e .env.local -e ecosystem.config.cjs
 
           echo "[deploy] commit: $(git rev-parse --short HEAD)"
+          echo "[deploy] subject: $(git show -s --format=%s HEAD)"
+          grep -n "Lien magique" pages/account.vue || true
           npm ci
           rm -rf .nuxt .output
           npm run build
 
-          # Extra safety: ensure no stale process keeps old chunks in memory.
-          if pm2 describe stellara > /dev/null 2>&1; then
-            pm2 restart stellara --update-env
+          # Runtime restart strategy:
+          # 1) Prefer systemd service if present (current production setup)
+          # 2) Fallback to PM2 for legacy environments
+          if systemctl list-unit-files | grep -q '^stellara.service'; then
+            systemctl daemon-reload || true
+            systemctl restart stellara
+            systemctl is-active --quiet stellara
+            RUNTIME_PORT=$(awk -F= '/^PORT=/{print $2}' /etc/stellara/stellara.env 2>/dev/null | tail -n 1)
+            if [ -z "${RUNTIME_PORT:-}" ]; then
+              RUNTIME_PORT=3000
+            fi
+            echo "[deploy] systemd runtime port: ${RUNTIME_PORT}"
+            curl -fsS "http://127.0.0.1:${RUNTIME_PORT}/api/backend-status" || true
           else
-            pm2 start ecosystem.config.cjs
+            pm2 delete stellara > /dev/null 2>&1 || true
+            if [ -f ecosystem.config.cjs ]; then
+              pm2 start ecosystem.config.cjs --only stellara --update-env
+            else
+              pm2 start .output/server/index.mjs --name stellara --cwd "${{ env.REMOTE_DIR }}" --update-env
+            fi
+            pm2 describe stellara | sed -n '1,80p'
+            pm2 save
           fi
-          pm2 save
           EOF
