@@ -20,6 +20,12 @@ export default defineNuxtConfig({
   app: {
     head: {
       htmlAttrs: { lang: 'fr', class: 'dark' },
+      meta: [
+        {
+          name: 'google-site-verification',
+          content: 'dS4lDtb3GkUFSthFb5DQkzfwTUYCP_dKFWE5m1s7V8E',
+        },
+      ],
       link: [
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
@@ -63,7 +69,11 @@ export default defineNuxtConfig({
       stripeBuyLinkFallback: process.env.STRIPE_BUY_LINK || '',
       stripeSubMonthlyLink: process.env.NUXT_PUBLIC_STRIPE_SUB_MONTHLY_LINK || '',
       stripeSubYearlyLink: process.env.NUXT_PUBLIC_STRIPE_SUB_YEARLY_LINK || '',
-        appUrl: process.env.NUXT_PUBLIC_APP_URL || process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+      appUrl:
+        process.env.NUXT_PUBLIC_APP_URL
+        || process.env.NEXT_PUBLIC_APP_URL
+        || process.env.NUXT_PUBLIC_SITE_URL
+        || 'http://localhost:3000',
     },
   },
 
