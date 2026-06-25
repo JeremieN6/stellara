@@ -1,11 +1,21 @@
 import blogData from '../../data/blog.json'
+import { existsSync, readdirSync } from 'node:fs'
+import { join, relative, sep } from 'node:path'
 
 type BlogEntry = {
   slug?: string
   date?: string
 }
 
-const pageModules = import.meta.glob('../../pages/**/*.vue')
+const FALLBACK_STATIC_ROUTES = [
+  '/',
+  '/account',
+  '/horoscope-du-jour',
+  '/mentions-legales',
+  '/rapport',
+  '/blog',
+  '/checkout/success',
+]
 
 function normalizeBaseUrl(event: Parameters<typeof useRuntimeConfig>[0]): string {
   const config = useRuntimeConfig(event)
@@ -31,8 +41,7 @@ function normalizeRoute(route: string): string {
 }
 
 function pageFileToRoute(filePath: string): string | null {
-  const relative = filePath.replace('../../pages', '').replace(/\.vue$/, '')
-  const route = normalizeRoute(relative || '/')
+  const route = normalizeRoute(filePath.replace(/\.vue$/, '') || '/')
 
   if (!route.startsWith('/')) return null
   if (route.includes('[') || route.includes(']')) return null
@@ -40,6 +49,44 @@ function pageFileToRoute(filePath: string): string | null {
   if (route === '/api' || route.startsWith('/api/')) return null
 
   return route
+}
+
+function collectPageFiles(dirPath: string, rootPath: string, files: string[] = []): string[] {
+  const entries = readdirSync(dirPath, { withFileTypes: true })
+
+  for (const entry of entries) {
+    const absolutePath = join(dirPath, entry.name)
+
+    if (entry.isDirectory()) {
+      collectPageFiles(absolutePath, rootPath, files)
+      continue
+    }
+
+    if (!entry.isFile() || !entry.name.endsWith('.vue')) continue
+
+    const relativePath = relative(rootPath, absolutePath)
+    const normalized = `/${relativePath.split(sep).join('/')}`
+    files.push(normalized)
+  }
+
+  return files
+}
+
+function getStaticRoutesFromPagesDir(): string[] {
+  const pagesDir = join(process.cwd(), 'pages')
+  if (!existsSync(pagesDir)) return [...FALLBACK_STATIC_ROUTES]
+
+  try {
+    const pageFiles = collectPageFiles(pagesDir, pagesDir)
+    const routes = pageFiles
+      .map(pageFileToRoute)
+      .filter((route): route is string => Boolean(route))
+
+    return routes.length > 0 ? routes : [...FALLBACK_STATIC_ROUTES]
+  } catch (error) {
+    console.error('[sitemap] pages scan failed, fallback routes used:', error)
+    return [...FALLBACK_STATIC_ROUTES]
+  }
 }
 
 function escapeXml(value: string): string {
@@ -55,9 +102,7 @@ export default defineEventHandler((event) => {
   const baseUrl = normalizeBaseUrl(event)
   const nowIso = new Date().toISOString()
 
-  const staticRoutes = Object.keys(pageModules)
-    .map(pageFileToRoute)
-    .filter((route): route is string => Boolean(route))
+  const staticRoutes = getStaticRoutesFromPagesDir()
 
   const blogEntries = (Array.isArray(blogData) ? blogData : []) as BlogEntry[]
   const blogRoutes = blogEntries
