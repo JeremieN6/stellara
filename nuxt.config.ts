@@ -40,6 +40,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     // Server-only
     databaseUrl: process.env.DATABASE_URL || '',
+    anthropicApiKey: process.env.ANTHROPIC_API_KEY || '',
     openaiApiKey: process.env.OPENAI_API_KEY || '',
     brevoApiKey: process.env.BREVO_API_KEY || '',
     brevoListIdLeads: process.env.BREVO_LIST_ID_LEADS || '',

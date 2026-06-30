@@ -384,20 +384,30 @@ function isLockedPlanet(index: number): boolean {
 const publicPreviewPlanets = computed(() => planets.value.slice(0, 5))
 
 const houses = computed(() => {
+  const rawHouseReadings = reportData.value.houseReadings
+  const houseReadings = (rawHouseReadings && typeof rawHouseReadings === 'object')
+    ? rawHouseReadings as Record<string, unknown>
+    : {}
+
+  const houseText = (house: number, fallback: string): string => {
+    const value = houseReadings[String(house)]
+    return typeof value === 'string' && value.trim() ? value.trim() : fallback
+  }
+
   const asc = String(reportData.value.ascendant || 'votre ascendant')
   return [
-    { index: 1, title: 'Identité', description: `Avec votre ascendant en ${asc}, votre maniere d\'entrer en relation est marquée par cette energie.`, locked: false },
-    { index: 2, title: 'Valeurs et ressources', description: 'Votre rapport à l\'argent et à vos talents naturels.', locked: true },
-    { index: 3, title: 'Communication', description: 'Votre facon de penser, d\'apprendre et d\'echanger.', locked: true },
-    { index: 4, title: 'Foyer et racines', description: 'Votre base émotionnelle et vos besoins de securité.', locked: true },
-    { index: 5, title: 'Creativité et amour', description: 'Expression de soi, joie et élan du coeur.', locked: true },
-    { index: 6, title: 'Santé et travail', description: 'Organisation, habitudes et sens du service.', locked: true },
-    { index: 7, title: 'Partenariats', description: 'Dynamique de couple et collaborations majeures.', locked: true },
-    { index: 8, title: 'Transformations', description: 'Mues profondes, pouvoir personnel et intimité.', locked: true },
-    { index: 9, title: 'Vision et philosophie', description: 'Croyances, études et ouverture au monde.', locked: true },
-    { index: 10, title: 'Carrière et mission', description: 'Direction de vie et réalisation publique.', locked: true },
-    { index: 11, title: 'Amitiés et projets', description: 'Réseaux et ideal collectif.', locked: true },
-    { index: 12, title: 'Inconscient', description: 'Monde interieur, intuition et retrait.', locked: true },
+    { index: 1, title: 'Identité', description: houseText(1, `Avec votre ascendant en ${asc}, votre maniere d'entrer en relation est marquee par cette energie.`), locked: false },
+    { index: 2, title: 'Valeurs et ressources', description: houseText(2, 'Votre rapport a l argent et a vos talents naturels.'), locked: true },
+    { index: 3, title: 'Communication', description: houseText(3, 'Votre facon de penser, d apprendre et d echanger.'), locked: true },
+    { index: 4, title: 'Foyer et racines', description: houseText(4, 'Votre base emotionnelle et vos besoins de securite.'), locked: true },
+    { index: 5, title: 'Creativite et amour', description: houseText(5, 'Expression de soi, joie et elan du coeur.'), locked: true },
+    { index: 6, title: 'Sante et travail', description: houseText(6, 'Organisation, habitudes et sens du service.'), locked: true },
+    { index: 7, title: 'Partenariats', description: houseText(7, 'Dynamique de couple et collaborations majeures.'), locked: true },
+    { index: 8, title: 'Transformations', description: houseText(8, 'Mues profondes, pouvoir personnel et intimite.'), locked: true },
+    { index: 9, title: 'Vision et philosophie', description: houseText(9, 'Croyances, etudes et ouverture au monde.'), locked: true },
+    { index: 10, title: 'Carriere et mission', description: houseText(10, 'Direction de vie et realisation publique.'), locked: true },
+    { index: 11, title: 'Amities et projets', description: houseText(11, 'Reseaux et ideal collectif.'), locked: true },
+    { index: 12, title: 'Inconscient', description: houseText(12, 'Monde interieur, intuition et retrait.'), locked: true },
   ]
 })
 

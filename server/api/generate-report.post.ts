@@ -1,6 +1,14 @@
 import { buildNatalChart } from '../utils/astro'
 import { reports } from '../../db/schema'
 import { getDbIfConfigured } from '../utils/db'
+import {
+  buildHouseContext,
+  detectMajorAspects,
+  generateFallbackHouseReadings,
+  generateFallbackSummary,
+  HOUSE_THEMES,
+  normalizeHouseReadings,
+} from '../utils/report-readings'
 import tzLookup from 'tz-lookup'
 
 interface ReportRequest {
@@ -42,17 +50,22 @@ export default defineEventHandler(async (event) => {
     body.lon,
   )
 
-  // Generate AI summary if OpenAI key is configured
+  // Generate summary + 12 house readings once, then persist in DB.
   const config = useRuntimeConfig()
   const fallbackSummary = generateFallbackSummary(body.firstName, chart)
+  const fallbackHouseReadings = generateFallbackHouseReadings(chart)
   let summary = fallbackSummary
+  let houseReadings = fallbackHouseReadings
 
-  if (config.openaiApiKey) {
+  if (config.anthropicApiKey) {
     try {
-      summary = await generateAiSummary(body, chart, config.openaiApiKey as string, 4500)
+      const generated = await generateClaudeReadings(body, chart, config.anthropicApiKey as string, 7000)
+      summary = generated.summary
+      houseReadings = generated.houses
     } catch (err) {
-      console.error('[OpenAI] Error:', err)
+      console.error('[Claude] Error:', err)
       summary = fallbackSummary
+      houseReadings = fallbackHouseReadings
     }
   }
 
@@ -74,6 +87,7 @@ export default defineEventHandler(async (event) => {
         moonSign: chart.moonSign,
         ascendant: chart.ascendant,
         summary,
+        houseReadings,
       }).returning({ id: reports.id })
 
       reportId = inserted[0]?.id ?? null
@@ -95,58 +109,167 @@ export default defineEventHandler(async (event) => {
     ascendantDegree: chart.ascendantDegree,
     planets: chart.planets,
     summary,
+    houseReadings,
     fullAnalysis: null, // premium only
   }
 })
 
-async function generateAiSummary(
+async function generateClaudeReadings(
   user: ReportRequest,
   chart: ReturnType<typeof buildNatalChart>,
   apiKey: string,
-  timeoutMs = 4500,
-): Promise<string> {
-  const planetsList = chart.planets.map((p) => `${p.planet} en ${p.sign}`).join(', ')
+  timeoutMs = 7000,
+): Promise<{ summary: string; houses: Record<string, string> }> {
+  const houseContext = buildHouseContext(chart)
+  const aspects = detectMajorAspects(chart)
+  const fallback = {
+    summary: generateFallbackSummary(user.firstName, chart),
+    houses: generateFallbackHouseReadings(chart),
+  }
 
-  const prompt = `Tu es un expert en astrologie. Rédige un portrait astrologique personnalisé et bienveillant en français pour ${user.firstName}.
+  const signByPlanet = Object.fromEntries(chart.planets.map((planet) => [planet.planet, planet.sign]))
+  const houseBySign = Object.fromEntries(houseContext.map((entry) => [entry.sign, Number(entry.house)]))
 
-Données du thème natal :
-- Signe Solaire : ${chart.sunSign}
-- Signe Lunaire : ${chart.moonSign}
-- Ascendant : ${chart.ascendant} (${chart.ascendantDegree}°)
-- Planètes : ${planetsList}
+  const promptData = {
+    firstName: user.firstName,
+    ascendant: chart.ascendant,
+    sun: {
+      sign: chart.sunSign,
+      house: houseBySign[chart.sunSign] ?? null,
+    },
+    moon: {
+      sign: chart.moonSign,
+      house: houseBySign[chart.moonSign] ?? null,
+    },
+    planets: {
+      mercure: {
+        sign: signByPlanet['Mercure'] ?? null,
+        house: signByPlanet['Mercure'] ? (houseBySign[signByPlanet['Mercure']] ?? null) : null,
+      },
+      venus: {
+        sign: signByPlanet['Vénus'] ?? null,
+        house: signByPlanet['Vénus'] ? (houseBySign[signByPlanet['Vénus']] ?? null) : null,
+      },
+      mars: {
+        sign: signByPlanet['Mars'] ?? null,
+        house: signByPlanet['Mars'] ? (houseBySign[signByPlanet['Mars']] ?? null) : null,
+      },
+      jupiter: {
+        sign: signByPlanet['Jupiter'] ?? null,
+        house: signByPlanet['Jupiter'] ? (houseBySign[signByPlanet['Jupiter']] ?? null) : null,
+      },
+      saturne: {
+        sign: signByPlanet['Saturne'] ?? null,
+        house: signByPlanet['Saturne'] ? (houseBySign[signByPlanet['Saturne']] ?? null) : null,
+      },
+    },
+    majorAspects: aspects,
+    houses: houseContext.map((entry) => ({
+      house: Number(entry.house),
+      theme: HOUSE_THEMES[entry.house],
+      sign: entry.sign,
+      planetsInHouse: entry.planets,
+    })),
+  }
 
-Rédige un paragraphe de 120-160 mots qui synthétise la personnalité, les forces et les défis principaux.
-Style : direct, précis, encourageant. Évite les formules génériques. Commence par le prénom.`
+  const systemPrompt = `Tu es un astrologue professionnel qui redige des lectures de theme natal precises et engageantes en francais.
+
+Regles strictes:
+- Utilise uniquement les donnees du JSON utilisateur. N'invente jamais de position, d'aspect ou de maison.
+- Ne sois pas generique. Croise explicitement les placements entre eux.
+- Evite les formulations vagues type energie unique, combinaison cosmique, voyage interieur.
+- Resume: 150-200 mots, vouvoiement, commence par le prenom, termine par une phrase qui invite a approfondir les maisons/aspects sans injonction commerciale.
+- Maisons: 12 textes, chacun 60-80 mots, concrets et personnalises.
+- Reponse obligatoire: JSON pur, sans markdown ni texte hors JSON.
+
+Format EXACT attendu:
+{
+  "summary": "...",
+  "houses": {
+    "1": "...",
+    "2": "...",
+    "3": "...",
+    "4": "...",
+    "5": "...",
+    "6": "...",
+    "7": "...",
+    "8": "...",
+    "9": "...",
+    "10": "...",
+    "11": "...",
+    "12": "..."
+  }
+}`
+
+  const userPrompt = `Donnees astrologiques calculees (ne rien supposer au-dela):\n${JSON.stringify(promptData, null, 2)}`
 
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), timeoutMs)
 
   try {
-    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       signal: controller.signal,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [{ role: 'user', content: prompt }],
-        max_tokens: 220,
-        temperature: 0.8,
+        model: 'claude-3-5-sonnet-latest',
+        system: systemPrompt,
+        messages: [{ role: 'user', content: [{ type: 'text', text: userPrompt }] }],
+        max_tokens: 2200,
+        temperature: 0.3,
       }),
     })
 
-    if (!res.ok) throw new Error(`OpenAI HTTP ${res.status}`)
-    const data = await res.json() as { choices: Array<{ message: { content: string } }> }
-    return data.choices[0]?.message?.content?.trim() || ''
+    if (!res.ok) throw new Error(`Claude HTTP ${res.status}`)
+    const data = await res.json() as {
+      content?: Array<{ type: string; text?: string }>
+    }
+
+    const rawText = data.content
+      ?.filter((item) => item.type === 'text')
+      .map((item) => item.text || '')
+      .join('\n')
+      .trim() || ''
+
+    const parsed = parseJsonFromModel(rawText)
+    if (!parsed) return fallback
+
+    const summary = typeof parsed.summary === 'string' && parsed.summary.trim()
+      ? parsed.summary.trim()
+      : fallback.summary
+    const houses = normalizeHouseReadings(parsed.houses, fallback.houses)
+
+    return { summary, houses }
   } finally {
     clearTimeout(timeout)
   }
 }
 
-function generateFallbackSummary(firstName: string, chart: ReturnType<typeof buildNatalChart>): string {
-  return `${firstName}, votre thème natal révèle une personnalité façonnée par une combinaison unique d'énergies cosmiques. En tant que ${chart.sunSign}, vous portez en vous une énergie solaire distinctive. Votre Lune en ${chart.moonSign} guide votre vie émotionnelle intérieure, vous donnant une sensibilité particulière et des réactions instinctives caractéristiques. Votre Ascendant en ${chart.ascendant} constitue votre façade au monde, la première impression que vous laissez et la manière dont vous abordez les nouvelles situations. L'ensemble de vos positions planétaires dessine un portrait complexe et nuancé qui va bien au-delà de votre simple signe solaire. Chaque planète dans son signe apporte une couleur unique à votre personnalité, vos désirs, votre communication et votre façon d'interagir avec le monde. Votre rapport complet explore ces nuances en profondeur.`
+function parseJsonFromModel(rawText: string): { summary?: unknown; houses?: unknown } | null {
+  if (!rawText.trim()) return null
+
+  const candidates = [rawText]
+  const fencedMatch = rawText.match(/```(?:json)?\s*([\s\S]*?)\s*```/i)
+  if (fencedMatch?.[1]) {
+    candidates.push(fencedMatch[1])
+  }
+
+  for (const candidate of candidates) {
+    try {
+      const parsed = JSON.parse(candidate)
+      if (parsed && typeof parsed === 'object') {
+        return parsed as { summary?: unknown; houses?: unknown }
+      }
+    } catch {
+      // Continue trying alternative extraction.
+    }
+  }
+
+  return null
 }
 
 function localDateTimeToUtc(

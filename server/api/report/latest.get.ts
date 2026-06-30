@@ -3,6 +3,7 @@ import tzLookup from 'tz-lookup'
 import { reports } from '../../../db/schema'
 import { buildNatalChart } from '../../utils/astro'
 import { getDbOrThrow } from '../../utils/db'
+import { generateFallbackHouseReadings, normalizeHouseReadings } from '../../utils/report-readings'
 
 export default defineEventHandler(async (event) => {
   const email = String(getQuery(event).email || '').trim().toLowerCase()
@@ -51,6 +52,9 @@ export default defineEventHandler(async (event) => {
     report.lon,
   )
 
+  const fallbackHouseReadings = generateFallbackHouseReadings(chart)
+  const houseReadings = normalizeHouseReadings(report.houseReadings, fallbackHouseReadings)
+
   return {
     isPremium: Boolean(report.isPremium),
     report: {
@@ -64,6 +68,7 @@ export default defineEventHandler(async (event) => {
       ascendantDegree: chart.ascendantDegree,
       planets: chart.planets,
       summary: report.summary || '',
+      houseReadings,
       fullAnalysis: null,
     },
   }

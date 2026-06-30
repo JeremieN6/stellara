@@ -1,6 +1,7 @@
 import {
   pgTable,
   text,
+  jsonb,
   timestamp,
   uuid,
   boolean,
@@ -24,6 +25,7 @@ export const reports = pgTable('reports', {
   moonSign: text('moon_sign').notNull(),
   ascendant: text('ascendant').notNull(),
   summary: text('summary'),
+  houseReadings: jsonb('house_readings').$type<Record<string, string>>(),
   isPremium: boolean('is_premium').default(false),
   stripeSessionId: text('stripe_session_id'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
