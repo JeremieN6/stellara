@@ -67,6 +67,7 @@ export default defineEventHandler(async (event) => {
       ascendant: report.ascendant,
       ascendantDegree: chart.ascendantDegree,
       planets: chart.planets,
+      personalizedSummary: report.summary || '',
       summary: report.summary || '',
       houseReadings,
       fullAnalysis: null,

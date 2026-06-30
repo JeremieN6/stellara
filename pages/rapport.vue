@@ -340,6 +340,8 @@ async function handleCaptureEmail(email: string) {
 
   const reportId = String(reportStore.reportData?.reportId || '')
   const reportData = reportStore.reportData || {}
+  const personalizedSummary = String(reportData.personalizedSummary || '').trim()
+  const legacySummary = String(reportData.summary || '').trim()
   const previewPayload = {
     firstName: String(reportData.firstName || ''),
     birthDate: String(reportData.birthDate || ''),
@@ -347,7 +349,7 @@ async function handleCaptureEmail(email: string) {
     sunSign: String(reportData.sunSign || ''),
     moonSign: String(reportData.moonSign || ''),
     ascendant: String(reportData.ascendant || ''),
-    summary: String(reportData.summary || ''),
+    summary: personalizedSummary || legacySummary,
   }
 
   try {

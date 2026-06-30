@@ -108,6 +108,7 @@ export default defineEventHandler(async (event) => {
     ascendant: chart.ascendant,
     ascendantDegree: chart.ascendantDegree,
     planets: chart.planets,
+    personalizedSummary: summary,
     summary,
     houseReadings,
     fullAnalysis: null, // premium only

@@ -298,7 +298,15 @@ const planets = computed(() => {
 })
 
 const firstName = computed(() => String(reportData.value.firstName || ''))
-const summaryText = computed(() => String(reportData.value.summary || 'Resume indisponible.'))
+const summaryText = computed(() => {
+  const personalizedSummary = String(reportData.value.personalizedSummary || '').trim()
+  if (personalizedSummary) return personalizedSummary
+
+  const legacySummary = String(reportData.value.summary || '').trim()
+  if (legacySummary) return legacySummary
+
+  return 'Resume indisponible.'
+})
 const fullAnalysis = computed(() => String(reportData.value.fullAnalysis || ''))
 
 const signInsight: Record<string, { subtitle: string; description: string; tags: string[]; glyph: string }> = {
@@ -389,25 +397,27 @@ const houses = computed(() => {
     ? rawHouseReadings as Record<string, unknown>
     : {}
 
-  const houseText = (house: number, fallback: string): string => {
+  const houseText = (house: number): string => {
     const value = houseReadings[String(house)]
-    return typeof value === 'string' && value.trim() ? value.trim() : fallback
-  }
+    if (typeof value === 'string' && value.trim()) {
+      return value.trim()
+    }
 
-  const asc = String(reportData.value.ascendant || 'votre ascendant')
+    return 'Lecture personnalisee indisponible pour cette maison.'
+  }
   return [
-    { index: 1, title: 'Identité', description: houseText(1, `Avec votre ascendant en ${asc}, votre maniere d'entrer en relation est marquee par cette energie.`), locked: false },
-    { index: 2, title: 'Valeurs et ressources', description: houseText(2, 'Votre rapport a l argent et a vos talents naturels.'), locked: true },
-    { index: 3, title: 'Communication', description: houseText(3, 'Votre facon de penser, d apprendre et d echanger.'), locked: true },
-    { index: 4, title: 'Foyer et racines', description: houseText(4, 'Votre base emotionnelle et vos besoins de securite.'), locked: true },
-    { index: 5, title: 'Creativite et amour', description: houseText(5, 'Expression de soi, joie et elan du coeur.'), locked: true },
-    { index: 6, title: 'Sante et travail', description: houseText(6, 'Organisation, habitudes et sens du service.'), locked: true },
-    { index: 7, title: 'Partenariats', description: houseText(7, 'Dynamique de couple et collaborations majeures.'), locked: true },
-    { index: 8, title: 'Transformations', description: houseText(8, 'Mues profondes, pouvoir personnel et intimite.'), locked: true },
-    { index: 9, title: 'Vision et philosophie', description: houseText(9, 'Croyances, etudes et ouverture au monde.'), locked: true },
-    { index: 10, title: 'Carriere et mission', description: houseText(10, 'Direction de vie et realisation publique.'), locked: true },
-    { index: 11, title: 'Amities et projets', description: houseText(11, 'Reseaux et ideal collectif.'), locked: true },
-    { index: 12, title: 'Inconscient', description: houseText(12, 'Monde interieur, intuition et retrait.'), locked: true },
+    { index: 1, title: 'Identité', description: houseText(1), locked: false },
+    { index: 2, title: 'Valeurs et ressources', description: houseText(2), locked: true },
+    { index: 3, title: 'Communication', description: houseText(3), locked: true },
+    { index: 4, title: 'Foyer et racines', description: houseText(4), locked: true },
+    { index: 5, title: 'Creativite et amour', description: houseText(5), locked: true },
+    { index: 6, title: 'Sante et travail', description: houseText(6), locked: true },
+    { index: 7, title: 'Partenariats', description: houseText(7), locked: true },
+    { index: 8, title: 'Transformations', description: houseText(8), locked: true },
+    { index: 9, title: 'Vision et philosophie', description: houseText(9), locked: true },
+    { index: 10, title: 'Carriere et mission', description: houseText(10), locked: true },
+    { index: 11, title: 'Amities et projets', description: houseText(11), locked: true },
+    { index: 12, title: 'Inconscient', description: houseText(12), locked: true },
   ]
 })
 

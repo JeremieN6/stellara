@@ -11,6 +11,7 @@ const FALLBACK_STATIC_ROUTES = [
   '/',
   '/account',
   '/horoscope-du-jour',
+  '/lexique',
   '/mentions-legales',
   '/rapport',
   '/blog',

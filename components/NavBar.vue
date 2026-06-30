@@ -148,6 +148,7 @@ const accountLabel = computed(() => {
 
 const navLinks = [
   { href: '/horoscope-du-jour', label: 'Horoscope du jour' },
+  { href: '/lexique', label: 'Lexique astro' },
   { href: '/#how-it-works', label: 'Comment ça marche' },
   { href: '/#pricing', label: 'Tarifs' },
   { href: '/blog', label: 'Blog', isNew: true },
