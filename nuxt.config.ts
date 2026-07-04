@@ -42,6 +42,8 @@ export default defineNuxtConfig({
     databaseUrl: process.env.DATABASE_URL || '',
     anthropicApiKey: process.env.ANTHROPIC_API_KEY || '',
     openaiApiKey: process.env.OPENAI_API_KEY || '',
+    astrologyApiKey: process.env.ASTROLOGY_API_KEY || '',
+    astrologyApiBaseUrl: process.env.ASTROLOGY_API_BASE_URL || 'https://api.api-ninjas.com',
     brevoApiKey: process.env.BREVO_API_KEY || '',
     brevoListIdLeads: process.env.BREVO_LIST_ID_LEADS || '',
     stripeSecretKey: process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SK || '',
