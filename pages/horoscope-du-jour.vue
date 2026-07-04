@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <section class="min-h-screen pb-16 pt-20 sm:pb-20 sm:pt-24">
     <div class="section-shell">
       <div class="mx-auto max-w-4xl">
