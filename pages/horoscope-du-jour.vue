@@ -35,7 +35,7 @@
           </div>
 
           <p class="mt-3 text-xs text-slate-500">
-            Mis en cache par jour et par signe pour une reponse instantanee.
+            Mis en cache par jour et par signe pour une reponse instantanée.
           </p>
 
           <div v-if="errorMessage" class="mt-6 rounded-2xl border border-red-400/25 bg-red-500/10 px-4 py-3 text-sm text-red-200">
@@ -49,20 +49,20 @@
                   {{ signLabel(horoscope.sign) }} - {{ formattedDate(horoscope.date) }}
                 </h2>
                 <span class="rounded-full border border-amber-300/25 bg-amber-400/10 px-3 py-1 text-xs uppercase tracking-[0.14em] text-amber-200">
-                  Source reelle
+                  Source réelle
                 </span>
               </div>
               <p class="mt-3 text-xs uppercase tracking-[0.16em] text-slate-400">
                 Lecture quotidienne par signe
               </p>
-              <p class="mt-4 text-sm leading-7 text-slate-200">{{ horoscope.reading }}</p>
+              <p class="mt-4 text-sm leading-7 text-slate-200">{{ horoscope.readingFr }}</p>
             </div>
 
             <div class="rounded-2xl border border-amber-300/30 bg-amber-400/10 p-5">
               <p class="text-xs uppercase tracking-[0.16em] text-amber-200">Orbite Premium</p>
               <h3 class="mt-3 font-display text-2xl text-white sm:text-3xl">Lecture approfondie</h3>
               <p class="mt-3 text-sm leading-7 text-slate-200">
-                Ajoutez une lecture plus detaillee avec vos transits personnels, synchronisee avec votre compte.
+                Ajoutez une lecture plus detaillee avec vos transits personnels, synchronisée avec votre compte.
               </p>
 
               <div class="mt-5 flex flex-wrap items-center gap-3">
@@ -78,9 +78,9 @@
               </div>
             </div>
 
-            <p class="text-xs text-slate-500">
+            <!-- <p class="text-xs text-slate-500">
               Source: {{ horoscope.provider }} ({{ horoscope.source }}). {{ horoscope.disclaimer }}
-            </p>
+            </p> -->
           </div>
         </div>
       </div>
@@ -112,6 +112,7 @@ interface HoroscopeResponse {
   date: string
   sign: SignValue
   reading: string
+  readingFr: string
   provider: 'api_ninjas'
   source: 'api' | 'cache'
   disclaimer: string
@@ -171,14 +172,14 @@ async function fetchHoroscope() {
 
   try {
     const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Paris'
-    const res = await $fetch<HoroscopeResponse>('/api/horoscope-today', {
+    const res = await $fetch('/api/horoscope-today', {
       query: {
         sign: selectedSign.value,
         lang: 'fr',
         timezone: timeZone,
       },
     })
-    horoscope.value = res
+    horoscope.value = res as HoroscopeResponse
     saveSignPreference()
   } catch (error) {
     console.error(error)

@@ -107,7 +107,7 @@ const entries: LexiconEntry[] = [
     title: 'Ascendant',
     definition: "L'ascendant correspond au signe qui se levait à l'est à l'instant de votre naissance. Il influence la manière dont vous entrez en relation avec le monde.",
     details: "Il colore votre style d'expression, votre première impression et votre rythme d'action. C'est l'un des piliers majeurs d'une lecture astrologique de précision.",
-    schema: 'Signe solaire = identité centrale | Ascendant = manière d agir',
+    schema: 'Signe solaire = identité centrale | Ascendant = manière d\'agir',
   },
   {
     id: 'maisons-astrologiques',
