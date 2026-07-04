@@ -77,6 +77,11 @@ function getLocalDateISO(timeZone: string): string {
   return formatter.format(new Date())
 }
 
+function readServerEnv(name: string): string {
+  const value = process.env[name]
+  return typeof value === 'string' ? value.trim() : ''
+}
+
 function extractReading(raw: unknown): string | null {
   if (!raw || typeof raw !== 'object') return null
   const data = raw as Record<string, unknown>
@@ -339,7 +344,11 @@ export default defineEventHandler(async (event) => {
   }
 
   const config = useRuntimeConfig(event)
-  const apiKey = (config.astrologyApiKey || '').trim()
+  const apiKey =
+    (config.astrologyApiKey || '').trim()
+    || readServerEnv('ASTROLOGY_API_KEY')
+    || readServerEnv('ASTRO_API_KEY')
+    || readServerEnv('NUXT_ASTROLOGY_API_KEY')
   if (!apiKey) {
     throw createError({
       statusCode: 503,
@@ -347,14 +356,23 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const baseUrl = (config.astrologyApiBaseUrl || 'https://api.api-ninjas.com').trim()
+  const baseUrl =
+    (config.astrologyApiBaseUrl || '').trim()
+    || readServerEnv('ASTROLOGY_API_BASE_URL')
+    || readServerEnv('ASTRO_API_BASE_URL')
+    || readServerEnv('NUXT_ASTROLOGY_API_BASE_URL')
+    || 'https://api.api-ninjas.com'
   const sourcePayload = await fetchFromApiNinjas(sign, apiKey, baseUrl)
   const localized = await localizeToFrench(
     sign,
     dateIso,
     sourcePayload.reading,
-    (config.anthropicApiKey || '').trim(),
-    (config.openaiApiKey || '').trim(),
+    (config.anthropicApiKey || '').trim()
+      || readServerEnv('ANTHROPIC_API_KEY')
+      || readServerEnv('NUXT_ANTHROPIC_API_KEY'),
+    (config.openaiApiKey || '').trim()
+      || readServerEnv('OPENAI_API_KEY')
+      || readServerEnv('NUXT_OPENAI_API_KEY'),
   )
 
   const payload: HoroscopePayload = {
