@@ -151,7 +151,7 @@ async function localizeWithAnthropic(
       'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
-      model: 'claude-3-5-sonnet-latest',
+      model: 'claude-haiku-4-5-20251001',
       system: 'Tu renvoies uniquement un JSON valide, sans markdown.',
       messages: [{ role: 'user', content: [{ type: 'text', text: prompt }] }],
       max_tokens: 700,
