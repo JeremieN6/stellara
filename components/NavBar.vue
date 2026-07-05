@@ -33,6 +33,44 @@
       </NuxtLink>
 
       <div class="hidden items-center gap-8 md:flex">
+        <div ref="resourcesDropdownRef" class="relative">
+          <button
+            type="button"
+            class="inline-flex items-center gap-2 pb-0.5 text-sm text-slate-300 transition-colors duration-200 hover:text-white"
+            aria-haspopup="true"
+            :aria-expanded="resourcesOpen"
+            @click="resourcesOpen = !resourcesOpen"
+          >
+            Explorer astro
+            <svg
+              class="h-4 w-4 transition-transform duration-200"
+              :class="resourcesOpen ? 'rotate-180' : ''"
+              viewBox="0 0 20 20"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+
+          <Transition name="drop-fade">
+            <div
+              v-if="resourcesOpen"
+              class="absolute right-0 top-full mt-3 w-60 overflow-hidden rounded-2xl border border-white/15 bg-[rgba(10,10,26,0.95)] p-2 shadow-[0_16px_40px_rgba(0,0,0,0.35)]"
+            >
+              <NuxtLink
+                v-for="resource in resourceLinks"
+                :key="resource.href"
+                :to="resource.href"
+                class="block rounded-xl px-3 py-2.5 text-sm text-slate-200 transition hover:bg-white/10 hover:text-white"
+                @click="resourcesOpen = false"
+              >
+                {{ resource.label }}
+              </NuxtLink>
+            </div>
+          </Transition>
+        </div>
+
         <template v-for="link in navLinks" :key="link.label">
           <NuxtLink
             :to="link.href"
@@ -94,11 +132,46 @@
     <Transition name="slide-down">
       <div v-if="menuOpen" class="border-t border-white/10 bg-[rgba(10,10,26,0.95)] px-6 py-4 md:hidden">
         <nav class="flex flex-col gap-4">
+          <div class="rounded-2xl border border-white/10 bg-white/5 p-2">
+            <button
+              type="button"
+              class="flex w-full items-center justify-between rounded-xl px-2 py-2 text-sm text-slate-200"
+              :aria-expanded="mobileResourcesOpen"
+              aria-controls="mobile-resources-menu"
+              @click="mobileResourcesOpen = !mobileResourcesOpen"
+            >
+              <span>Explorer astro</span>
+              <svg
+                class="h-4 w-4 transition-transform duration-200"
+                :class="mobileResourcesOpen ? 'rotate-180' : ''"
+                viewBox="0 0 20 20"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </button>
+
+            <Transition name="drop-fade">
+              <div v-if="mobileResourcesOpen" id="mobile-resources-menu" class="mt-1 flex flex-col gap-1">
+                <NuxtLink
+                  v-for="resource in resourceLinks"
+                  :key="`mobile-resource-${resource.href}`"
+                  :to="resource.href"
+                  class="rounded-xl px-3 py-2 text-sm text-slate-300 transition hover:bg-white/10 hover:text-white"
+                  @click="closeAllMenus"
+                >
+                  {{ resource.label }}
+                </NuxtLink>
+              </div>
+            </Transition>
+          </div>
+
           <template v-for="link in navLinks" :key="`mobile-${link.label}`">
             <NuxtLink
               :to="link.href"
               class="inline-flex items-center gap-2 text-sm text-slate-300 transition-colors hover:text-white"
-              @click="menuOpen = false"
+              @click="closeAllMenus"
             >
               {{ link.label }}
               <span
@@ -110,17 +183,18 @@
               </span>
             </NuxtLink>
           </template>
+
           <NuxtLink
             to="/account"
             class="inline-flex items-center justify-center rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white"
-            @click="menuOpen = false"
+            @click="closeAllMenus"
           >
             {{ isAuthenticated ? `Mon compte (${accountLabel})` : 'Mon compte' }}
           </NuxtLink>
           <NuxtLink
             to="/rapport"
             class="inline-flex justify-center rounded-full bg-[linear-gradient(135deg,#7c3aed,#a855f7_50%,#f59e0b)] px-5 py-3 text-sm font-semibold text-white shadow-[0_0_20px_rgba(124,58,237,0.4)] transition-all duration-300"
-            @click="menuOpen = false"
+            @click="closeAllMenus"
           >
             Obtenir mon rapport
           </NuxtLink>
@@ -135,8 +209,11 @@ import { onMounted, onUnmounted } from 'vue'
 
 const isScrolled = ref(false)
 const menuOpen = ref(false)
+const resourcesOpen = ref(false)
+const mobileResourcesOpen = ref(false)
 const profileFirstName = ref('')
 const reportStore = useReportStore()
+const resourcesDropdownRef = ref<HTMLElement | null>(null)
 
 const isAuthenticated = computed(() => Boolean(reportStore.userEmail))
 const accountLabel = computed(() => {
@@ -148,14 +225,30 @@ const accountLabel = computed(() => {
 
 const navLinks = [
   { href: '/horoscope-du-jour', label: 'Horoscope du jour' },
-  { href: '/lexique', label: 'Lexique astro' },
   { href: '/#how-it-works', label: 'Comment ça marche' },
-  { href: '/#pricing', label: 'Tarifs' },
   { href: '/blog', label: 'Blog', isNew: true },
+]
+
+const resourceLinks = [
+  { href: '/lexique', label: 'Lexique astro' },
+  { href: '/signes-astrologiques', label: 'Signes astrologiques' },
 ]
 
 function updateScrolledState() {
   isScrolled.value = window.scrollY > 8
+}
+
+function closeAllMenus() {
+  menuOpen.value = false
+  resourcesOpen.value = false
+  mobileResourcesOpen.value = false
+}
+
+function handleDocumentClick(event: MouseEvent) {
+  const target = event.target
+  if (!(target instanceof Node)) return
+  if (resourcesDropdownRef.value?.contains(target)) return
+  resourcesOpen.value = false
 }
 
 async function hydrateProfileName() {
@@ -180,6 +273,7 @@ onMounted(() => {
   updateScrolledState()
   hydrateProfileName()
   window.addEventListener('scroll', updateScrolledState, { passive: true })
+  document.addEventListener('click', handleDocumentClick)
 })
 
 watch(
@@ -189,9 +283,17 @@ watch(
   },
 )
 
+watch(
+  () => menuOpen.value,
+  (isOpen) => {
+    if (!isOpen) mobileResourcesOpen.value = false
+  },
+)
+
 onUnmounted(() => {
   window.removeEventListener('scroll', updateScrolledState)
-  menuOpen.value = false
+  document.removeEventListener('click', handleDocumentClick)
+  closeAllMenus()
 })
 </script>
 
@@ -205,6 +307,17 @@ onUnmounted(() => {
 .slide-down-leave-to {
   opacity: 0;
   transform: translateY(-10px);
+}
+
+.drop-fade-enter-active,
+.drop-fade-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.drop-fade-enter-from,
+.drop-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
 }
 
 .new-dot {
