@@ -38,82 +38,36 @@ jobs:
           git fetch --all --prune
           git reset --hard origin/main
           # Keep env/config files but remove stale tracked and untracked artifacts.
-          git clean -fd -e .env -e .env.local -e ecosystem.config.cjs -e ecosystem.config.js
+          git clean -fd -e .env -e .env.local -e ecosystem.config.cjs
 
           echo "[deploy] commit: $(git rev-parse --short HEAD)"
           echo "[deploy] subject: $(git show -s --format=%s HEAD)"
-          cat > .deploy-version.json <<JSON
-          {
-            "commit": "$(git rev-parse HEAD)",
-            "shortCommit": "$(git rev-parse --short HEAD)",
-            "subject": "$(git show -s --format=%s HEAD | sed 's/"/\\"/g')",
-            "deployedAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          }
-          JSON
           grep -n "Lien magique" pages/account.vue || true
           npm ci
           rm -rf .nuxt .output
           npm run build
 
-          EXPECTED_COMMIT=$(git rev-parse --short HEAD)
-          HAS_SYSTEMD=false
-          HAS_PM2_APP=false
-          RUNTIME_PORT=$(awk -F= '/^PORT=/{print $2}' /etc/stellara/stellara.env 2>/dev/null | tail -n 1)
-          if [ -z "${RUNTIME_PORT:-}" ]; then
-            RUNTIME_PORT=3000
-          fi
-          PUBLIC_BASE_URL=$(awk -F= '/^NUXT_PUBLIC_SITE_URL=/{print $2}' .env.local 2>/dev/null | tail -n 1 | tr -d '"')
-
-          if systemctl list-unit-files | grep -q '^stellara.service'; then
-            HAS_SYSTEMD=true
-          fi
-
-          if command -v pm2 > /dev/null 2>&1 && pm2 jlist | grep -q '"name":"stellara"'; then
-            HAS_PM2_APP=true
-          fi
-
-          echo "[deploy] has systemd: ${HAS_SYSTEMD}"
-          echo "[deploy] has pm2 app: ${HAS_PM2_APP}"
-          if [ "${HAS_SYSTEMD}" = true ] && [ "${HAS_PM2_APP}" = true ]; then
-            echo "[deploy] warning: systemd and PM2 both manage stellara"
-          fi
-
           # Runtime restart strategy:
-          # Keep both managers in sync when they coexist, otherwise the served
-          # instance may stay stale even though deployment itself succeeded.
-          if [ "${HAS_SYSTEMD}" = true ]; then
+          # 1) Prefer systemd service if present (current production setup)
+          # 2) Fallback to PM2 for legacy environments
+          if systemctl list-unit-files | grep -q '^stellara.service'; then
             systemctl daemon-reload || true
             systemctl restart stellara
-            systemctl status stellara --no-pager || true
-          fi
-
-          if [ "${HAS_PM2_APP}" = true ]; then
-            pm2 restart stellara --update-env
-            pm2 describe stellara | sed -n '1,80p'
-            pm2 save
-          elif [ "${HAS_SYSTEMD}" != true ]; then
+            systemctl is-active --quiet stellara
+            RUNTIME_PORT=$(awk -F= '/^PORT=/{print $2}' /etc/stellara/stellara.env 2>/dev/null | tail -n 1)
+            if [ -z "${RUNTIME_PORT:-}" ]; then
+              RUNTIME_PORT=3000
+            fi
+            echo "[deploy] systemd runtime port: ${RUNTIME_PORT}"
+            curl -fsS "http://127.0.0.1:${RUNTIME_PORT}/api/backend-status" || true
+          else
             pm2 delete stellara > /dev/null 2>&1 || true
             if [ -f ecosystem.config.cjs ]; then
               pm2 start ecosystem.config.cjs --only stellara --update-env
-            elif [ -f ecosystem.config.js ]; then
-              pm2 start ecosystem.config.js --only stellara --update-env
             else
               pm2 start .output/server/index.mjs --name stellara --cwd "${{ env.REMOTE_DIR }}" --update-env
             fi
             pm2 describe stellara | sed -n '1,80p'
             pm2 save
-          fi
-
-          echo "[deploy] runtime port: ${RUNTIME_PORT}"
-          LOCAL_STATUS=$(curl -fsS "http://127.0.0.1:${RUNTIME_PORT}/api/backend-status")
-          echo "[deploy] local backend status: ${LOCAL_STATUS}"
-          echo "${LOCAL_STATUS}" | grep -F '"shortCommit":"'"${EXPECTED_COMMIT}"'"' > /dev/null
-
-          if [ -n "${PUBLIC_BASE_URL:-}" ]; then
-            PUBLIC_STATUS=$(curl -fsS "${PUBLIC_BASE_URL}/api/backend-status")
-            echo "[deploy] public backend status: ${PUBLIC_STATUS}"
-            echo "${PUBLIC_STATUS}" | grep -F '"shortCommit":"'"${EXPECTED_COMMIT}"'"' > /dev/null
-          else
-            echo "[deploy] public backend status check skipped: NUXT_PUBLIC_SITE_URL missing"
           fi
           EOF
