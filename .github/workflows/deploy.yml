@@ -42,6 +42,14 @@ jobs:
 
           echo "[deploy] commit: $(git rev-parse --short HEAD)"
           echo "[deploy] subject: $(git show -s --format=%s HEAD)"
+          cat > .deploy-version.json <<JSON
+          {
+            "commit": "$(git rev-parse HEAD)",
+            "shortCommit": "$(git rev-parse --short HEAD)",
+            "subject": "$(git show -s --format=%s HEAD | sed 's/"/\\"/g')",
+            "deployedAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          }
+          JSON
           grep -n "Lien magique" pages/account.vue || true
           npm ci
           rm -rf .nuxt .output
