@@ -38,7 +38,7 @@ jobs:
           git fetch --all --prune
           git reset --hard origin/main
           # Keep env/config files but remove stale tracked and untracked artifacts.
-          git clean -fd -e .env -e .env.local -e ecosystem.config.cjs
+          git clean -fd -e .env -e .env.local -e ecosystem.config.cjs -e ecosystem.config.js -e start-stellara.sh
 
           echo "[deploy] commit: $(git rev-parse --short HEAD)"
           echo "[deploy] subject: $(git show -s --format=%s HEAD)"
