@@ -47,6 +47,11 @@ jobs:
           rm -rf .nuxt .output
           npm run build
 
+          # Keep wrapper executable when it is managed directly on the VPS.
+          if [ -f start-stellara.sh ]; then
+            chmod +x start-stellara.sh
+          fi
+
           # Runtime restart strategy:
           # PM2-only to match production process management.
           pm2 delete stellara > /dev/null 2>&1 || true
@@ -63,5 +68,21 @@ jobs:
             RUNTIME_PORT=3010
           fi
           echo "[deploy] pm2 runtime port: ${RUNTIME_PORT}"
-          curl -fsS "http://127.0.0.1:${RUNTIME_PORT}/api/backend-status"
+
+          HEALTH_OK=false
+          for TRY in 1 2 3 4 5 6 7 8 9 10; do
+            if curl -fsS "http://127.0.0.1:${RUNTIME_PORT}/api/backend-status"; then
+              HEALTH_OK=true
+              break
+            fi
+            echo "[deploy] backend not ready yet (attempt ${TRY}/10), retrying..."
+            sleep 2
+          done
+
+          if [ "${HEALTH_OK}" != true ]; then
+            echo "[deploy] backend failed health check on port ${RUNTIME_PORT}"
+            pm2 describe stellara | sed -n '1,120p' || true
+            pm2 logs stellara --lines 80 --nostream || true
+            exit 1
+          fi
           EOF
