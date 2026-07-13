@@ -16,6 +16,8 @@ export interface NatalChart {
   moonSign: string
   ascendant: string
   ascendantDegree: number
+  sunDegree: number
+  moonDegree: number
   planets: PlanetPosition[]
 }
 
@@ -192,6 +194,8 @@ export function buildNatalChart(
     moonSign: moon.sign,
     ascendant: asc.sign,
     ascendantDegree: Math.round(asc.degree * 10) / 10,
+    sunDegree: Math.round(sun.degree * 10) / 10,
+    moonDegree: Math.round(moon.degree * 10) / 10,
     planets,
   }
 }

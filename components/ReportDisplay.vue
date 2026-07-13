@@ -6,8 +6,8 @@
         Le theme de <span class="text-amber-300 uppercase">{{ firstName }}</span>
       </h1>
       <p class="mx-auto mt-4 max-w-3xl text-sm leading-7 text-slate-300 sm:text-base">
-        Decouvrez les influences célestes qui guident votre chemin de vie,
-        vos relations et votre potentiel cache.
+        Découvrez les influences célestes qui guident votre chemin de vie,
+        vos relations et votre potentiel caché.
       </p>
     </header>
 
@@ -46,7 +46,7 @@
       <div class="flex items-start justify-between gap-4">
         <div>
           <p class="eyebrow mb-2">Resumé personnalisé</p>
-          <h3 class="font-display text-2xl text-white sm:text-3xl">Votre lecture rapide</h3>
+          <h3 class="font-display text-2xl text-white sm:text-3xl">Votre lecture profonde</h3>
         </div>
         <button
           v-if="hasAccessUnlocked"
@@ -59,6 +59,57 @@
         </button>
       </div>
       <p class="mt-4 text-sm leading-7 text-slate-200 sm:text-[15px]">{{ summaryText }}</p>
+    </section>
+
+    <section v-if="thematicSections.length" class="space-y-4 sm:space-y-5">
+      <article
+        v-for="(section, sectionIndex) in thematicSections"
+        :key="section.key"
+        class="glass-panel relative overflow-hidden border border-white/15 px-5 py-5 sm:px-8 sm:py-7"
+      >
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">{{ section.emoji }}</span>
+            <h3 class="font-display text-xl text-white sm:text-2xl">{{ section.title }}</h3>
+          </div>
+          <div
+            v-if="!isPremium && hasLeadEmail && sectionIndex === 0"
+            class="shrink-0 rounded-full border border-emerald-300/30 bg-emerald-300/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] text-emerald-200"
+          >
+            Offert
+          </div>
+        </div>
+
+        <p class="mt-4 text-sm leading-7 text-slate-200 sm:text-[15px]">{{ section.teaser }}</p>
+
+        <div class="relative mt-3" :class="isSectionFullyUnlocked(sectionIndex) ? '' : 'min-h-[96px]'">
+          <p
+            class="text-sm leading-7 text-slate-300 sm:text-[15px]"
+            :class="isSectionFullyUnlocked(sectionIndex) ? '' : 'blur-[5px] opacity-60 select-none pointer-events-none'"
+          >
+            {{ section.full }}
+          </p>
+          <div v-if="!isSectionFullyUnlocked(sectionIndex)" class="absolute inset-0 flex items-end justify-center pb-1">
+            <a
+              v-if="!hasLeadEmail"
+              href="#lead-capture"
+              class="rounded-full border border-amber-400/35 bg-black/55 px-4 py-1.5 text-[11px] uppercase tracking-[0.16em] text-amber-300 transition-colors hover:border-amber-300/60 hover:text-amber-100"
+              @click.prevent="scrollToLeadCapture"
+            >
+              ✉️ Entrez votre email pour compléter votre thème
+            </a>
+            <a
+              v-else
+              :href="stripeLink"
+              target="_blank"
+              rel="noopener"
+              class="rounded-full border border-amber-400/35 bg-black/55 px-4 py-1.5 text-[11px] uppercase tracking-[0.16em] text-amber-300 transition-colors hover:border-amber-300/60 hover:text-amber-100"
+            >
+              🔒 Débloquer la suite
+            </a>
+          </div>
+        </div>
+      </article>
     </section>
 
     <section v-if="showLeadCapture" class="glass-panel overflow-hidden border border-white/15 px-5 py-5 sm:px-8 sm:py-7">
@@ -86,14 +137,15 @@
 
     <section
       v-if="showLeadCapture"
+      id="lead-capture"
       class="glass-panel relative overflow-hidden border border-amber-400/30 bg-gradient-to-b from-amber-400/10 to-transparent px-5 py-5 sm:px-8 sm:py-7"
     >
       <div class="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-amber-300/20 blur-2xl" />
       <div class="relative">
-        <p class="eyebrow mb-2">Étape suivante</p>
-        <h3 class="font-display text-2xl text-white sm:text-3xl">Recevez votre aperçu et sauvegardez votre theme</h3>
+        <p class="eyebrow mb-2">Étape suivante · gratuit</p>
+        <h3 class="font-display text-2xl text-white sm:text-3xl">Entrez votre email pour compléter votre thème</h3>
         <p class="mt-3 max-w-6xl text-sm leading-7 text-slate-200">
-          Entrez votre email pour reçevoir votre rapport en PDF. Retrouver votre lecture plus tard et debloquer 1 planète supplementaire en aperçu gratuit.
+          Débloquez gratuitement vos positions planétaires complètes et vos 12 maisons, recevez votre aperçu en PDF, et retrouvez votre lecture à tout moment.
         </p>
 
         <form class="mt-5 space-y-4" @submit.prevent="submitLeadEmail">
@@ -177,12 +229,21 @@
     </section>
 
     <section v-if="hasAccessUnlocked" class="glass-panel relative overflow-hidden border border-white/15 px-5 py-5 sm:px-8 sm:py-7">
-      <div :class="isPremium ? '' : 'blur-[4px] opacity-60 select-none'">
+      <div>
         <p class="eyebrow mb-1">Aspects planetaires</p>
         <h3 class="font-display text-2xl text-white sm:text-3xl">Harmonies et tensions du ciel</h3>
         <p class="mt-2 max-w-3xl text-sm text-slate-300">
-          Conjonctions, carres, trigones, oppositions et sextiles - la carte complete de vos dynamiques interieures.
+          {{ aspectsSection?.teaser || 'Conjonctions, carres, trigones, oppositions et sextiles - la carte complete de vos dynamiques interieures.' }}
         </p>
+
+        <div class="relative mt-3" :class="isPremium ? '' : 'min-h-[92px]'">
+          <p
+            class="max-w-5xl text-sm leading-7 text-slate-300 sm:text-[15px]"
+            :class="isPremium ? '' : 'blur-[4px] opacity-60 select-none pointer-events-none'"
+          >
+            {{ aspectsSection?.full || 'La dynamique complete de vos aspects est disponible dans le rapport premium.' }}
+          </p>
+        </div>
       </div>
       <div v-if="!isPremium" class="absolute inset-0 flex items-center justify-end pr-4 sm:pr-8">
         <span class="rounded-2xl border border-amber-400/35 bg-black/45 px-4 py-3 text-xs uppercase tracking-[0.2em] text-amber-300">🔒 Debloquer pour voir</span>
@@ -193,9 +254,9 @@
       <p class="mx-auto mb-3 inline-flex rounded-full border border-amber-400/35 bg-amber-400/10 px-4 py-1 text-xs uppercase tracking-[0.2em] text-amber-300">
         ✦ Rapport complet premium ✦
       </p>
-      <h3 class="text-center font-display text-3xl text-white sm:text-3xl">Débloquez l'integralité de votre theme natal</h3>
+      <h3 class="text-center font-display text-3xl text-white sm:text-3xl">Débloquez l'integralité de votre thème natal</h3>
       <p class="mx-auto mt-4 max-w-3xl text-center text-sm leading-7 text-slate-200 sm:text-base">
-        Accedez aux 10 planètes, aux 12 maisons, aux aspects planetaires, aux transits et a la compatibilité amoureuse.
+        Accédez aux 10 planètes, aux 12 maisons, aux aspects planetaires, aux transits, à la compatibilité amoureuse et bien d'autres éléments.
       </p>
 
       <div class="mx-auto mt-6 grid max-w-4xl grid-cols-2 gap-3 sm:grid-cols-4">
@@ -237,9 +298,13 @@
         {{ pdfLoading ? 'Generation...' : (isPremium ? 'Telecharger mon rapport complet' : 'Recevoir mon aperçu PDF') }}
       </button>
 
-      <NuxtLink to="/rapport" class="text-sm text-slate-400 underline underline-offset-4 transition-colors hover:text-white">
-        Calculer un autre theme
-      </NuxtLink>
+      <button
+        type="button"
+        class="text-sm text-slate-400 underline underline-offset-4 transition-colors hover:text-white"
+        @click="emit('new-report')"
+      >
+        Calculer un autre thème
+      </button>
     </div>
   </div>
 </template>
@@ -253,6 +318,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'capture-email', email: string): void
+  (e: 'new-report'): void
 }>()
 
 const isPremium = computed(() => props.isPremium)
@@ -309,19 +375,31 @@ const summaryText = computed(() => {
 })
 const fullAnalysis = computed(() => String(reportData.value.fullAnalysis || ''))
 
+type ThematicSection = { key: string; emoji: string; title: string; teaser: string; full: string }
+
+const thematicSections = computed<ThematicSection[]>(() => {
+  const value = reportData.value.sections
+  if (!Array.isArray(value)) return []
+  return value as ThematicSection[]
+})
+
+const aspectsSection = computed<ThematicSection | null>(() => {
+  return thematicSections.value.find((section) => section.key === 'aspects') || null
+})
+
 const signInsight: Record<string, { subtitle: string; description: string; tags: string[]; glyph: string }> = {
-  belier: { subtitle: 'Feu - impulsion', description: 'Votre energie est directe, entreprenante et orientee action.', tags: ['Initiative', 'Courage', 'Action'], glyph: '♈' },
+  belier: { subtitle: 'Feu - impulsion', description: 'Votre énergie est directe, entreprenante et orientée action.', tags: ['Initiative', 'Courage', 'Action'], glyph: '♈' },
   taureau: { subtitle: 'Terre - stabilite', description: 'Vous avancez avec constance et un fort sens du concret.', tags: ['Loyaute', 'Stabilite', 'Sensuel'], glyph: '♉' },
   gemeaux: { subtitle: 'Air - communication', description: 'Votre esprit curieux capte vite les nuances et les idees.', tags: ['Curiosite', 'Adaptable', 'Esprit vif'], glyph: '♊' },
   cancer: { subtitle: 'Eau - sensibilite', description: 'Votre monde interieur nourrit une grande intuition relationnelle.', tags: ['Intuition', 'Protection', 'Empathie'], glyph: '♋' },
-  lion: { subtitle: 'Feu - rayonnement', description: 'Vous exprimez une energie creative et une presence chaleureuse.', tags: ['Creatif', 'Noble', 'Charisme'], glyph: '♌' },
-  vierge: { subtitle: 'Terre - discernement', description: 'Vous cherchez la justesse, la precision et l utilite.', tags: ['Analyse', 'Service', 'Rigueur'], glyph: '♍' },
+  lion: { subtitle: 'Feu - rayonnement', description: 'Vous exprimez une énergie creative et une présence chaleureuse.', tags: ['Creatif', 'Noble', 'Charisme'], glyph: '♌' },
+  vierge: { subtitle: 'Terre - discernement', description: 'Vous cherchez la justesse, la précision et l\'utilité.', tags: ['Analyse', 'Service', 'Rigueur'], glyph: '♍' },
   balance: { subtitle: 'Air - harmonie', description: 'Vous cultivez l equilibre, le charme et la cooperation.', tags: ['Diplomatie', 'Esthetique', 'Equilibre'], glyph: '♎' },
-  scorpion: { subtitle: 'Eau - transformation', description: 'Votre intensite emotionnelle alimente des metamorphoses profondes.', tags: ['Intensite', 'Perception', 'Profondeur'], glyph: '♏' },
-  sagittaire: { subtitle: 'Feu - expansion', description: 'Votre quete de sens vous pousse vers de nouveaux horizons.', tags: ['Optimiste', 'Explorateur', 'Vision'], glyph: '♐' },
+  scorpion: { subtitle: 'Eau - transformation', description: 'Votre intensité emotionnelle alimente des métamorphoses profondes.', tags: ['Intensite', 'Perception', 'Profondeur'], glyph: '♏' },
+  sagittaire: { subtitle: 'Feu - expansion', description: 'Votre quête de sens vous pousse vers de nouveaux horizons.', tags: ['Optimiste', 'Explorateur', 'Vision'], glyph: '♐' },
   capricorne: { subtitle: 'Terre - structure', description: 'Votre trajectoire se construit avec ambition et discipline.', tags: ['Ambition', 'Maturite', 'Perseverance'], glyph: '♑' },
   verseau: { subtitle: 'Air - innovation', description: 'Vous pensez differemment et aimez ouvrir de nouvelles voies.', tags: ['Original', 'Visionnaire', 'Libre'], glyph: '♒' },
-  poissons: { subtitle: 'Eau - receptivite', description: 'Votre sensibilite capte les subtilites invisibles.', tags: ['Intuitif', 'Imaginaire', 'Compassion'], glyph: '♓' },
+  poissons: { subtitle: 'Eau - receptivite', description: 'Votre sensibilité capte les subtilités invisibles.', tags: ['Intuitif', 'Imaginaire', 'Compassion'], glyph: '♓' },
 }
 
 function normalizeSign(sign: string): string {
@@ -378,7 +456,7 @@ const coreCards = computed(() => {
       eyebrow: '↑ Ascendant',
       title: asc,
       subtitle: ascInsight.subtitle,
-      description: `Votre presence sociale reflete l energie ${asc.toLowerCase()}. ${ascInsight.description}`,
+      description: `Votre présence sociale reflète l\'énergie ${asc.toLowerCase()}. ${ascInsight.description}`,
       tags: ascInsight.tags,
       glyph: ascInsight.glyph,
     },
@@ -387,6 +465,11 @@ const coreCards = computed(() => {
 
 function isLockedPlanet(index: number): boolean {
   return !props.isPremium && index >= 5
+}
+
+function isSectionFullyUnlocked(sectionIndex: number): boolean {
+  if (props.isPremium) return true
+  return hasLeadEmail.value && sectionIndex === 0
 }
 
 const publicPreviewPlanets = computed(() => planets.value.slice(0, 5))
@@ -431,6 +514,10 @@ const premiumFeatures = [
   { icon: '🏠', title: '12 maisons', subtitle: 'Chaque domaine de votre vie' },
   { icon: '⚡', title: 'Aspects', subtitle: 'Tensions et harmonies célestes' },
   { icon: '💕', title: 'Compatibilité', subtitle: 'Affinites amoureuses par signe' },
+  { icon: '💬', title: 'Pensées & Communication', subtitle: 'Comment vous pensez et communiquez' },
+  { icon: '🎯', title: 'Objectifs', subtitle: 'Votre mission de vie et vos défis professionnels' },
+  { icon: '🔮', title: 'Améliorations', subtitle: 'Les situations de blocages qui vous freinent' },
+  { icon: '✨', title: 'Interactions', subtitle: 'La carte des interactions entre vos planètes' },
 ]
 
 watch(
@@ -450,6 +537,14 @@ function submitLeadEmail() {
 
   leadSubmitting.value = true
   emit('capture-email', normalized)
+}
+
+function scrollToLeadCapture() {
+  if (!import.meta.client) return
+  const el = document.getElementById('lead-capture')
+  el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  const input = el?.querySelector('input[type="email"]') as HTMLInputElement | null
+  input?.focus({ preventScroll: true })
 }
 
 async function downloadPreviewPdf() {

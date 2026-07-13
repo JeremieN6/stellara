@@ -53,7 +53,7 @@
                 </span>
               </div>
               <p class="mt-3 text-xs uppercase tracking-[0.16em] text-slate-400">
-                Lecture quotidienne par signe
+                Lecture quotidienne
               </p>
               <p class="mt-4 text-sm leading-7 text-slate-200">{{ horoscope.readingFr }}</p>
             </div>
@@ -62,7 +62,7 @@
               <p class="text-xs uppercase tracking-[0.16em] text-amber-200">Orbite Premium</p>
               <h3 class="mt-3 font-display text-2xl text-white sm:text-3xl">Lecture approfondie</h3>
               <p class="mt-3 text-sm leading-7 text-slate-200">
-                Ajoutez une lecture plus detaillee avec vos transits personnels, synchronisée avec votre compte.
+                Ajoutez une lecture plus detaillée avec vos transits personnels, synchronisée avec votre compte.
               </p>
 
               <div class="mt-5 flex flex-wrap items-center gap-3">
@@ -70,10 +70,10 @@
                   href="/api/stripe/create-checkout-session?productType=orbite_premium&billingInterval=monthly"
                   class="cta-button w-full justify-center sm:w-auto"
                 >
-                  Aller plus loin avec Orbite Premium - 19EUR/mois
+                  Aller plus loin avec Orbite Premium - 19€/mois
                 </a>
                 <NuxtLink to="/account" class="secondary-button w-full justify-center sm:w-auto">
-                  Verifier mon statut
+                  Vérifier mon statut
                 </NuxtLink>
               </div>
             </div>

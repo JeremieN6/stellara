@@ -9,6 +9,15 @@ import {
   HOUSE_THEMES,
   normalizeHouseReadings,
 } from '../utils/report-readings'
+import {
+  buildSectionsPromptData,
+  buildSectionsUserPrompt,
+  buildThematicSections,
+  generateFallbackSections,
+  normalizeStoredSections,
+  SECTIONS_SYSTEM_PROMPT,
+  type StoredSections,
+} from '../utils/report-sections'
 import tzLookup from 'tz-lookup'
 
 interface ReportRequest {
@@ -54,19 +63,32 @@ export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
   const fallbackSummary = generateFallbackSummary(body.firstName, chart)
   const fallbackHouseReadings = generateFallbackHouseReadings(chart)
+  const fallbackSections = generateFallbackSections(chart)
   let summary = fallbackSummary
   let houseReadings = fallbackHouseReadings
+  let sections: StoredSections = fallbackSections
 
-  if (config.anthropicApiKey) {
-    try {
-      const generated = await generateClaudeReadings(body, chart, config.anthropicApiKey as string, 7000)
-      summary = generated.summary
-      houseReadings = generated.houses
-    } catch (err) {
-      console.error('[Claude] Error:', err)
-      summary = fallbackSummary
-      houseReadings = fallbackHouseReadings
+  const apiKey = resolveAnthropicApiKey(config)
+  if (apiKey) {
+    const [readingsResult, sectionsResult] = await Promise.allSettled([
+      generateClaudeReadings(body, chart, apiKey, 30000),
+      generateClaudeSections(body, chart, apiKey, 35000),
+    ])
+
+    if (readingsResult.status === 'fulfilled') {
+      summary = readingsResult.value.summary
+      houseReadings = readingsResult.value.houses
+    } else {
+      console.error('[Claude] readings error:', readingsResult.reason)
     }
+
+    if (sectionsResult.status === 'fulfilled') {
+      sections = sectionsResult.value
+    } else {
+      console.error('[Claude] sections error:', sectionsResult.reason)
+    }
+  } else {
+    console.warn('[Claude] ANTHROPIC API key missing at runtime; using fallback content')
   }
 
   let reportId: string | null = null
@@ -88,6 +110,7 @@ export default defineEventHandler(async (event) => {
         ascendant: chart.ascendant,
         summary,
         houseReadings,
+        sections,
       }).returning({ id: reports.id })
 
       reportId = inserted[0]?.id ?? null
@@ -111,6 +134,7 @@ export default defineEventHandler(async (event) => {
     personalizedSummary: summary,
     summary,
     houseReadings,
+    sections: buildThematicSections(chart, sections),
     fullAnalysis: null, // premium only
   }
 })
@@ -119,7 +143,7 @@ async function generateClaudeReadings(
   user: ReportRequest,
   chart: ReturnType<typeof buildNatalChart>,
   apiKey: string,
-  timeoutMs = 7000,
+  timeoutMs = 30000,
 ): Promise<{ summary: string; houses: Record<string, string> }> {
   const houseContext = buildHouseContext(chart)
   const aspects = detectMajorAspects(chart)
@@ -225,7 +249,10 @@ Format EXACT attendu:
       }),
     })
 
-    if (!res.ok) throw new Error(`Claude HTTP ${res.status}`)
+    if (!res.ok) {
+      const errorText = await res.text().catch(() => '')
+      throw new Error(`Claude HTTP ${res.status} (readings): ${errorText.slice(0, 500)}`)
+    }
     const data = await res.json() as {
       content?: Array<{ type: string; text?: string }>
     }
@@ -237,7 +264,10 @@ Format EXACT attendu:
       .trim() || ''
 
     const parsed = parseJsonFromModel(rawText)
-    if (!parsed) return fallback
+    if (!parsed) {
+      console.warn('[Claude] readings invalid JSON; fallback used', rawText.slice(0, 300))
+      return fallback
+    }
 
     const summary = typeof parsed.summary === 'string' && parsed.summary.trim()
       ? parsed.summary.trim()
@@ -250,7 +280,64 @@ Format EXACT attendu:
   }
 }
 
-function parseJsonFromModel(rawText: string): { summary?: unknown; houses?: unknown } | null {
+async function generateClaudeSections(
+  user: ReportRequest,
+  chart: ReturnType<typeof buildNatalChart>,
+  apiKey: string,
+  timeoutMs = 35000,
+): Promise<StoredSections> {
+  const fallback = generateFallbackSections(chart)
+  const promptData = buildSectionsPromptData(chart, user.firstName)
+  const userPrompt = buildSectionsUserPrompt(promptData)
+
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), timeoutMs)
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      signal: controller.signal,
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-3-5-sonnet-latest',
+        system: SECTIONS_SYSTEM_PROMPT,
+        messages: [{ role: 'user', content: [{ type: 'text', text: userPrompt }] }],
+        max_tokens: 2600,
+        temperature: 0.4,
+      }),
+    })
+
+    if (!res.ok) {
+      const errorText = await res.text().catch(() => '')
+      throw new Error(`Claude HTTP ${res.status} (sections): ${errorText.slice(0, 500)}`)
+    }
+    const data = await res.json() as {
+      content?: Array<{ type: string; text?: string }>
+    }
+
+    const rawText = data.content
+      ?.filter((item) => item.type === 'text')
+      .map((item) => item.text || '')
+      .join('\n')
+      .trim() || ''
+
+    const parsed = parseJsonFromModel(rawText)
+    if (!parsed) {
+      console.warn('[Claude] sections invalid JSON; fallback used', rawText.slice(0, 300))
+      return fallback
+    }
+
+    return normalizeStoredSections(parsed, fallback)
+  } finally {
+    clearTimeout(timeout)
+  }
+}
+
+function parseJsonFromModel(rawText: string): Record<string, unknown> | null {
   if (!rawText.trim()) return null
 
   const candidates = [rawText]
@@ -263,7 +350,7 @@ function parseJsonFromModel(rawText: string): { summary?: unknown; houses?: unkn
     try {
       const parsed = JSON.parse(candidate)
       if (parsed && typeof parsed === 'object') {
-        return parsed as { summary?: unknown; houses?: unknown }
+        return parsed as Record<string, unknown>
       }
     } catch {
       // Continue trying alternative extraction.
@@ -271,6 +358,19 @@ function parseJsonFromModel(rawText: string): { summary?: unknown; houses?: unkn
   }
 
   return null
+}
+
+function resolveAnthropicApiKey(config: ReturnType<typeof useRuntimeConfig>): string {
+  return (
+    String(config.anthropicApiKey || '').trim()
+    || readServerEnv('ANTHROPIC_API_KEY')
+    || readServerEnv('NUXT_ANTHROPIC_API_KEY')
+  )
+}
+
+function readServerEnv(name: string): string {
+  const env = process.env as Record<string, string | undefined>
+  return String(env[name] || '').trim()
 }
 
 function localDateTimeToUtc(

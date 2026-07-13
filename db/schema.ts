@@ -26,6 +26,7 @@ export const reports = pgTable('reports', {
   ascendant: text('ascendant').notNull(),
   summary: text('summary'),
   houseReadings: jsonb('house_readings').$type<Record<string, string>>(),
+  sections: jsonb('sections').$type<Record<string, { teaser: string; full: string }>>(),
   isPremium: boolean('is_premium').default(false),
   stripeSessionId: text('stripe_session_id'),
   createdAt: timestamp('created_at').defaultNow().notNull(),

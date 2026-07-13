@@ -4,6 +4,7 @@ import { reports } from '../../../db/schema'
 import { buildNatalChart } from '../../utils/astro'
 import { getDbOrThrow } from '../../utils/db'
 import { generateFallbackHouseReadings, normalizeHouseReadings } from '../../utils/report-readings'
+import { buildThematicSections } from '../../utils/report-sections'
 
 export default defineEventHandler(async (event) => {
   const email = String(getQuery(event).email || '').trim().toLowerCase()
@@ -54,6 +55,7 @@ export default defineEventHandler(async (event) => {
 
   const fallbackHouseReadings = generateFallbackHouseReadings(chart)
   const houseReadings = normalizeHouseReadings(report.houseReadings, fallbackHouseReadings)
+  const sections = buildThematicSections(chart, report.sections)
 
   return {
     isPremium: Boolean(report.isPremium),
@@ -70,6 +72,7 @@ export default defineEventHandler(async (event) => {
       personalizedSummary: report.summary || '',
       summary: report.summary || '',
       houseReadings,
+      sections,
       fullAnalysis: null,
     },
   }

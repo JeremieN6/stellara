@@ -64,17 +64,17 @@
           <h2 class="font-display text-3xl text-white">FAQ rapide</h2>
           <div class="mt-4 space-y-4 text-sm leading-7 text-slate-300">
             <p>
-              <span class="text-slate-100">Quel est le signe astrologique le plus sensible ?</span>
+              <span class="text-slate-100"><strong><em>Quel est le signe astrologique le plus sensible ?</em></strong></span> <br>
               En astrologie populaire, les signes d eau (Cancer, Scorpion, Poissons) sont souvent vus comme les plus
               receptifs sur le plan emotionnel.
             </p>
             <p>
-              <span class="text-slate-100">Le signe solaire suffit-il pour se connaitre ?</span>
+              <span class="text-slate-100"><strong><em>Le signe solaire suffit-il pour se connaitre ?</em></strong></span> <br>
               Non. Le signe solaire est la base, mais l ascendant, la Lune et les maisons donnent une lecture beaucoup
               plus precise.
             </p>
             <p>
-              <span class="text-slate-100">Comment aller plus loin apres cette page ?</span>
+              <span class="text-slate-100"><strong><em>Comment aller plus loin apres cette page ?</em></strong></span> <br>
               Vous pouvez continuer avec le lexique astrologique pour comprendre les notions de theme natal,
               aspects et transits.
             </p>
@@ -88,7 +88,7 @@
 <script setup lang="ts">
 useSeoMeta({
   title: 'Signes astrologiques: la nature profonde des 12 signes | Stellara',
-  description: 'Decouvrez les 12 signes astrologiques simplement: traits profonds, forces, vigilance et dynamique relationnelle pour debuter en astrologie.',
+  description: 'Découvrez les 12 signes astrologiques simplement: traits profonds, forces, vigilance et dynamique relationnelle pour debuter en astrologie.',
 })
 
 type SignSlug =

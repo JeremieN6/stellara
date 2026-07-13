@@ -29,6 +29,13 @@ export const useReportStore = defineStore('report', {
       }
     },
 
+    clearReportData() {
+      this.reportData = null
+      if (import.meta.client) {
+        localStorage.removeItem('Stellara_report_data')
+      }
+    },
+
     setUserEmail(email: string) {
       this.userEmail = email.trim().toLowerCase()
       if (import.meta.client) {

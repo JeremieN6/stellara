@@ -9,7 +9,7 @@
               Votre <span class="text-amber-300">carte du ciel</span>
             </h1>
             <p class="mx-auto mt-4 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
-              Decouvrez les influences célestes qui guident votre chemin de vie,
+              Découvrez les influences célestes qui guident votre chemin de vie,
               vos relations et votre potentiel caché.
             </p>
             <div class="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-400 sm:gap-6">
@@ -137,6 +137,7 @@
             :is-premium="reportStore.isPremium"
             :user-email="reportStore.userEmail"
             @capture-email="handleCaptureEmail"
+            @new-report="startNewReport"
           />
         </div>
       </Transition>
@@ -328,6 +329,24 @@ async function calculate() {
     alert('Une erreur s\'est produite. Veuillez réessayer.')
   } finally {
     calculating.value = false
+  }
+}
+
+function startNewReport() {
+  reportStore.clearReportData()
+  form.firstName = ''
+  form.birthDate = ''
+  form.birthTime = ''
+  form.gender = 'other'
+  form.lat = null
+  form.lon = null
+  form.city = ''
+  cityQuery.value = ''
+  geoResults.value = []
+  unknownBirthTime.value = false
+  step.value = 0
+  if (import.meta.client) {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 }
 

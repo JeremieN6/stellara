@@ -80,7 +80,7 @@ const faqs = [
     answer: 'L\'ascendant (ou signe montant) est le degré de l\'écliptique qui se levait à l\'est au moment de votre naissance. Il est calculé à partir de votre heure, date et lieu de naissance via les éphémérides et la formule trigonométrique de la maison 1.',
   },
   {
-    question: 'L\'aperçu gratuit est-il vraiment gratuit ?',
+    question: 'L\'aperçu offert est-il vraiment gratuit ?',
     answer: 'Oui, complètement gratuit et sans carte bancaire. Vous recevez votre signe solaire, lunaire, ascendant, les positions des 10 planètes et un résumé de personnalité de 500 mots. Aucun abonnement, aucune surprise.',
   },
   {
