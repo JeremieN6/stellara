@@ -1,153 +1,134 @@
-# 🌌 Stellara
+# Stellara
 
-**Stellara** est une application web innovante qui dépasse le simple horoscope quotidien.  
-Elle propose une **analyse astrologique personnalisée**, basée sur le thème natal complet de l’utilisateur (date, heure, lieu de naissance), et enrichie d’outils interactifs pour mieux comprendre les cycles planétaires, les opportunités personnelles et les dynamiques relationnelles.  
+Stellara est une application astrologique orientée conversion qui combine expérience produit, contenu éditorial et logique backend métier.
 
-🚀 Développée en **Symfony (backend)** et **Vue.js (frontend)**, l’application s’appuie sur des APIs astrologiques fiables pour générer des insights riches et engageants.
+Le projet a migré le backend vers un runtime full JavaScript:
+- Runtime principal: Nuxt 3 / Nitro
+- Base de donnees cible: Neon Postgres
+- Couche acces donnees: Drizzle ORM
+- Symfony legacy: encore present pendant la transition
 
----
+## Vision
 
-## ✨ Vision & Proposition de valeur
+Stellara vise une astrologie utile, actionnable et lisible:
+- parcours guide pour générer un rapport personnalisé
+- contenu éditorial SEO (blog, lexique, pages thematiques)
+- monétisation premium via Stripe
 
-Stellara ambitionne de créer un **pont entre la tradition astrologique et la technologie moderne**.  
-L’objectif est de rendre l’astrologie **interactive, visuelle et personnalisée**, au-delà des simples horoscopes généralistes.
+## Fonctionnalités actuelles
 
-- 🌠 **Différenciation** : là où la majorité des apps se limitent à un horoscope quotidien, Stellara propose des **analyses profondes**, des **visualisations claires** et des **rapports personnalisés**.  
-- 👥 **Engagement communautaire** : en offrant compatibilité, comparaisons et conseils relationnels, l’app vise à fédérer une communauté active autour de l’astrologie.  
-- 💡 **Valeur ajoutée** : insights psychologiques, cycles planétaires, biorythmes et notifications intelligentes aident l’utilisateur à prendre de meilleures décisions au quotidien.  
+- Génération de rapport astrologique avec persistance backend
+- Endpoint de statut backend: GET /api/backend-status
+- Endpoints compte/abonnement:
+  - GET /api/user/profile
+  - GET /api/user/subscription-status
+- Webhook Stripe securisé:
+  - POST /api/stripe/webhook
+- Section blog Nuxt avec source JSON statique (data/blog.json)
+- Page horoscope du jour avec endpoint dédié et cache journalier
 
----
+## Stack technique
 
-## ⚡ Fonctionnalités principales
+- Frontend: Nuxt 3, Vue 3, Tailwind CSS, Pinia
+- Backend (actuel): Nitro server routes et server utils
+- Base de donnees: PostgreSQL (Neon), Drizzle ORM, drizzle-kit
+- Paiement: Stripe
+- Email: Nodemailer + integration Brevo
+- Legacy en cohabitation: Symfony/PHP
 
-- **Profil astrologique personnalisé**
-  - Création de compte (e-mail ou réseaux sociaux).
-  - Calcul automatique du thème natal à partir des infos de naissance.
+## Prérequis
 
-- **Horoscope quotidien avancé**
-  - Prédictions basées sur le signe solaire, lunaire, l’ascendant et les aspects planétaires.
-  - Texte narratif enrichi et contextualisé.
+- Node.js 20+
+- npm 10+
+- PostgreSQL compatible Neon (ou instance locale)
+- Optionnel pour la partie legacy: PHP 8.2+, Composer
 
-- **Analyse des cycles planétaires**
-  - Transits actuels et leurs impacts (amour, carrière, finances, bien-être).
-  - Identification des phases favorables et défavorables.
+## Installation rapide
 
-- **Rapports personnalisés**
-  - Rapports mensuels et annuels.
-  - Événements astrologiques majeurs (éclipses, rétrogrades, nouvelles/pleines lunes).
+1. Cloner le depot
 
-- **Visualisations dynamiques**
-  - Graphiques de biorythmes et cycles planétaires.
-  - Indicateurs de jours favorables/défavorables.
-
-- **Analyse de compatibilité**
-  - Comparaison de thèmes astraux entre utilisateurs (ou avec célébrités).
-  - Conseils relationnels personnalisés.
-
-- **Insights psychologiques**
-  - Analyse de personnalité basée sur le thème natal.
-  - Suggestions pour le développement personnel.
-
-- **Notifications intelligentes**
-  - Alertes pour les événements astrologiques importants.
-  - Insights quotidiens sur mobile ou desktop.
-
----
-
-## 🛠️ Technologies utilisées
-
-- **Backend :** [Symfony](https://symfony.com/) – API REST sécurisée, gestion des utilisateurs et logique métier.  
-- **Frontend :** [Vue.js](https://vuejs.org/) – interface réactive, moderne et fluide.  
-- **Base de données :** MySQL ou PostgreSQL.  
-- **APIs externes :** intégration d’APIs astrologiques (Prokerala, FreeAstrologyAPI, AstroAPI.cloud…).  
-- **Notifications push :** Web Push / Firebase Cloud Messaging.  
-
----
-
-## 🚧 Roadmap (MVP → Version complète)
-
-### Phase 1 : MVP
-- [x] Authentification & gestion des utilisateurs.
-- [x] Création du profil astrologique.
-- [x] Horoscope quotidien personnalisé.
-
-### Phase 2 : Analyse & visualisation
-- [ ] Intégration des cycles planétaires & biorythmes.
-- [ ] Rapports mensuels et annuels.
-
-### Phase 3 : Compatibilité & insights
-- [ ] Analyse de compatibilité entre utilisateurs.
-- [ ] Insights psychologiques & conseils de développement personnel.
-
-### Phase 4 : Notifications & optimisation
-- [ ] Notifications push personnalisées.
-- [ ] Optimisation des performances & corrections de bugs.
-
----
-
-## ⚙️ Installation & lancement
-
-### 1. Cloner le dépôt
 ```bash
 git clone https://github.com/ton-compte/Stellara.git
 cd Stellara
 ```
 
-2. Installer les dépendances Symfony
+2. Installer les dépendances JavaScript
+
 ```bash
-Copier le code
-composer install
+npm install
 ```
 
-3. Configurer l’environnement
-Créer un fichier .env.local à partir de .env :
+3. Créer un fichier .env.local (base sur .env)
 
-env
-Copier le code
+```env
 APP_ENV=dev
-APP_SECRET=your_secret_key
-DATABASE_URL="mysql://user:password@127.0.0.1:3306/Stellara"
-ASTRO_API_KEY=your_api_key_here
-
-4. Créer la base de données & lancer les migrations
-```bash
-Copier le code
-php bin/console doctrine:database:create
-php bin/console doctrine:migrations:migrate
+DATABASE_URL=postgres://user:password@host:5432/neondb
+STRIPE_SECRET_KEY=sk_test_xxx
+STRIPE_WEBHOOK_SECRET=whsec_xxx
+BREVO_API_KEY=xxx
 ```
 
-5. Lancer le serveur Symfony
+4. Generer et/ou appliquer le schema Drizzle
+
 ```bash
-Copier le code
+npm run db:generate
+npm run db:push
+```
+
+5. Lancer le projet
+
+```bash
+npm run dev
+```
+
+Application accessible en local sur le port affiche par Nuxt (souvent http://localhost:3000).
+
+## Commandes utiles
+
+- npm run dev: lance le serveur de developpement Nuxt
+- npm run build: build production Nuxt
+- npm run preview: previsualise le build production
+- npm run db:generate: genere les migrations Drizzle
+- npm run db:push: pousse le schema Drizzle vers la base
+
+## Etat de migration
+
+Avancement actuel: migration backend vers full JS/Nitro en cours.
+
+Fait:
+- socle DB JS en place (Drizzle + DATABASE_URL)
+- nouvelles tables JS pretes pour Neon Postgres
+- endpoints compte/abonnement cote Nitro
+- webhook Stripe cote JS
+
+A faire ensuite:
+- appliquer les migrations Drizzle sur tous les environnements
+- seed des plans Stripe dans plans_js
+- brancher l UI premium sur le statut abonnement serveur
+- migrer les endpoints legacy estimation vers Nitro
+
+## Legacy Symfony (optionnel)
+
+La base Symfony reste disponible pendant la migration.
+
+Si tu dois travailler sur la partie legacy:
+
+```bash
+composer install
+php bin/console doctrine:migrations:migrate
 symfony serve
 ```
 
-6. Lancer le frontend Vue.js
-Dans le dossier /frontend :
+## Contribution
 
-```bash
-Copier le code
-npm install
-npm run dev
-```
-Application accessible sur :
-👉 http://localhost:8000
+Les contributions sont bienvenues.
 
-🤝 Contribution
-Les contributions sont les bienvenues !
+1. Creer une branche feature
+2. Commiter des changements atomiques
+3. Ouvrir une pull request avec contexte, impact et tests
 
-Fork le projet
-Crée ta branche (git checkout -b feature/ma-fonctionnalite)
-Commit tes changements (git commit -m 'Ajout nouvelle fonctionnalité')
-Push (git push origin feature/ma-fonctionnalite)
-Crée une Pull Request
+## Licence
 
-📜 Licence
-Projet distribué sous licence MIT.
-Libre à toi de l’utiliser, le modifier et le partager.
+Projet sous licence MIT.
 
-🌠 Conclusion
-Stellara offre une expérience riche et personnalisée, permettant aux utilisateurs d’aller au-delà des horoscopes quotidiens traditionnels.
-En combinant précision des calculs astrologiques, analyses comportementales et visualisations modernes, l’application ambitionne de devenir la référence digitale de l’astrologie interactive.
-
-👨‍💻 Développé avec ❤️ par @jeremiecode (contact: contact@jeremiecode.fr).
+👨‍💻 Développé avec ❤️ par @jeremiecode. (contact: contact@sassify.fr)
