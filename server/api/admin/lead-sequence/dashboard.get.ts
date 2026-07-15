@@ -71,10 +71,10 @@ export default defineEventHandler(async (event) => {
     })),
     sequenceDefinition: [
       { step: 0, delay: 'Immediat', label: "Ton theme natal t'attend" },
-      { step: 1, delay: 'J+1', label: 'Ce que ta Lune dit de tes emotions' },
+      { step: 1, delay: 'J+1', label: 'Ce que ta Lune dit de tes émotions' },
       { step: 2, delay: 'J+3', label: 'Le placement que tout le monde ignore' },
-      { step: 3, delay: 'J+5', label: 'Ce que les planetes disent de ta periode' },
-      { step: 4, delay: 'J+7', label: 'Ton rapport complet - offre limitee' },
+      { step: 3, delay: 'J+5', label: 'Ce que les planètes disent de ta periode' },
+      { step: 4, delay: 'J+7', label: 'Ton rapport complet - offre limitée' },
     ],
   }
 })

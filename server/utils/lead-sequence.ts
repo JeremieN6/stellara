@@ -94,17 +94,17 @@ const SEQUENCE_TEMPLATES: SequenceTemplate[] = [
     step: 3,
     templateKey: 'transits-premium',
     offsetDays: 5,
-    subject: () => 'Ce que les planetes disent de ta periode actuelle',
-    text: () => `Ton theme natal explique qui tu es. Les transits expliquent ce que tu traverses maintenant.\n\nC'est exactement la couche qui fait la difference pour prendre des decisions justes au bon moment.\n\nDecouvrir Orbite Premium: ${getCheckoutLink()}`,
-    html: () => `<p>Ton theme natal explique qui tu es. Les transits expliquent ce que tu traverses maintenant.</p><p>C'est exactement la couche qui fait la difference pour prendre des decisions justes au bon moment.</p><p><a href="${getCheckoutLink()}">Decouvrir Orbite Premium</a></p>`,
+    subject: () => 'Ce que les planètes disent de ta periode actuelle',
+    text: () => `Ton thème natal explique qui tu es. Les transits expliquent ce que tu traverses maintenant.\n\nC'est exactement la couche qui fait la différence pour prendre des décisions justes au bon moment.\n\nDécouvrir Orbite Premium: ${getCheckoutLink()}`,
+    html: () => `<p>Ton thème natal explique qui tu es. Les transits expliquent ce que tu traverses maintenant.</p><p>C'est exactement la couche qui fait la différence pour prendre des décisions justes au bon moment.</p><p><a href="${getCheckoutLink()}">Découvrir Orbite Premium</a></p>`,
   },
   {
     step: 4,
     templateKey: 'limited-offer',
     offsetDays: 7,
     subject: () => 'Ton rapport complet - offre limitee',
-    text: () => `Dernier rappel: ton offre decouverte est active pendant 48h.\n\nCarte Natale complete: 9,99 EUR -> 7,99 EUR\n\nAcceder a l'offre: ${getCheckoutLink()}`,
-    html: () => `<p>Dernier rappel: ton offre decouverte est active pendant 48h.</p><p><strong>Carte Natale complete: 9,99 EUR -> 7,99 EUR</strong></p><p><a href="${getCheckoutLink()}">Acceder a l'offre</a></p>`,
+    text: () => `Dernier rappel: ton offre découverte est active pendant 48h.\n\nCarte Natale complete: 9,99 EUR -> 7,99 EUR\n\nAccéder à l'offre: ${getCheckoutLink()}`,
+    html: () => `<p>Dernier rappel: ton offre decouverte est active pendant 48h.</p><p><strong>Carte Natale complète: 9,99 EUR -> 7,99 EUR</strong></p><p><a href="${getCheckoutLink()}">Accéder à l'offre</a></p>`,
   },
 ]
 

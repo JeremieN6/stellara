@@ -142,8 +142,8 @@ export function generateFallbackHouseReadings(chart: NatalChart): Record<string,
 
   for (const entry of context) {
     const planetsText = entry.planets.length
-      ? `Planetes a integrer: ${entry.planets.join(', ')}.`
-      : 'Aucune planete majeure n y est placee dans les donnees disponibles.'
+      ? `Planètes à intégrer: ${entry.planets.join(', ')}.`
+      : 'Aucune planète majeure n y est placée dans les données disponibles.'
 
     readings[entry.house] = `Maison ${entry.house} (${entry.theme}) en ${entry.sign}. Cette configuration indique comment vous abordez ce domaine de vie avec des réflexes propres à ce signe. ${planetsText} Le potentiel se développe surtout lorsque vous appliquez ces tendances de facon concrete et regulière.`
   }

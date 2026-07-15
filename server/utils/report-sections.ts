@@ -191,13 +191,13 @@ export function generateFallbackSections(chart: NatalChart): StoredSections {
       full: `Saturne en ${placementLabel(ctx.saturne)} represente vos limitations structurantes et vos peurs a apprivoiser. Pluton en ${placementLabel(ctx.pluton)} pointe des schemas profonds et inconscients qui se rejouent. Les aspects de tension de votre carte revelent ou l'energie se bloque et comment la liberer progressivement.`,
     },
     aspects: {
-      teaser: `Vos planetes ne travaillent pas isolement: leurs angles tissent une carte de tensions et d'harmonies unique, que votre rapport complet decode.`,
+      teaser: `Vos planètes ne travaillent pas isolement: leurs angles tissent une carte de tensions et d'harmonies unique, que votre rapport complet decode.`,
       full: ctx.aspects.length
         ? `Votre carte compte ${ctx.aspects.length} aspects majeurs. ${ctx.aspects
             .slice(0, 6)
             .map((aspect) => `${aspect.a} ${aspect.type} ${aspect.b}`)
             .join(', ')}. Chaque angle harmonieux est un talent naturel, chaque tension un chantier de croissance.`
-        : `Votre carte presente peu d'aspects serres entre planetes, ce qui traduit une energie plus independante entre les differentes facettes de votre personnalite.`,
+        : `Votre carte presente peu d'aspects serres entre planètes, ce qui traduit une energie plus independante entre les differentes facettes de votre personnalite.`,
     },
   }
 }
