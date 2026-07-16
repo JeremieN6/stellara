@@ -25,6 +25,10 @@ export default defineNuxtConfig({
           name: 'google-site-verification',
           content: 'dS4lDtb3GkUFSthFb5DQkzfwTUYCP_dKFWE5m1s7V8E',
         },
+        {
+          name: 'p:domain_verify',
+          content: 'f2e3dad86ccf8bb43ff8e204a97b9e39',
+        },
       ],
       link: [
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
