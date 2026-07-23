@@ -9,6 +9,7 @@ import { runLeadSequenceBatch, upsertLeadMagnetContact } from '../../utils/lead-
 interface CaptureEmailRequest {
   reportId?: string
   email?: string
+  acquisitionSource?: string
   previewPayload?: PreviewPdfPayload
 }
 
@@ -16,10 +17,23 @@ function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 }
 
+function normalizeAcquisitionSource(value: unknown): string | null {
+  const raw = String(value || '').trim().toLowerCase()
+  if (!raw) return null
+
+  const cleaned = raw
+    .replace(/\s+/g, '_')
+    .replace(/[^a-z0-9_:\/-]/g, '')
+    .slice(0, 120)
+
+  return cleaned || null
+}
+
 export default defineEventHandler(async (event) => {
   const body = await readBody<CaptureEmailRequest>(event)
   const email = (body.email || '').trim().toLowerCase()
   const reportId = (body.reportId || '').trim()
+  const acquisitionSource = normalizeAcquisitionSource(body.acquisitionSource)
 
   if (!email || !isValidEmail(email)) {
     throw createError({
@@ -66,6 +80,7 @@ export default defineEventHandler(async (event) => {
       await upsertLeadMagnetContact({
         email,
         firstName: normalizedFirstName,
+        acquisitionSource,
         moonSign,
         reportId: reportId || null,
       })
@@ -117,6 +132,7 @@ export default defineEventHandler(async (event) => {
     await upsertLeadMagnetContact({
       email,
       firstName: normalizedFirstName,
+      acquisitionSource,
       moonSign,
       reportId,
     })

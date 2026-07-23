@@ -106,6 +106,7 @@ export const leadMagnetContacts = pgTable('lead_magnet_contacts', {
   id: uuid('id').primaryKey().defaultRandom(),
   email: text('email').notNull(),
   firstName: text('first_name'),
+  acquisitionSource: text('acquisition_source'),
   moonSign: text('moon_sign'),
   reportId: uuid('report_id').references(() => reports.id, { onDelete: 'set null' }),
   currentStep: integer('current_step').default(0).notNull(),

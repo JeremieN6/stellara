@@ -18,6 +18,7 @@ type DashboardContact = {
   id: string
   email: string
   firstName: string | null
+  acquisitionSource: string | null
   currentStep: number
   sentEmailsCount: number
   converted: boolean
@@ -34,6 +35,18 @@ type DashboardStats = {
   activeSequenceCount: number
   completedSequenceCount: number
   dueNowCount: number
+}
+
+type DashboardGrowthPoint = {
+  day: string
+  totalContacts: number
+  convertedContacts: number
+}
+
+type DashboardSourceRow = {
+  source: string
+  totalContacts: number
+  convertedContacts: number
 }
 
 function normalizeName(value: string | null): string {
@@ -122,6 +135,7 @@ function getCheckoutLink(): string {
 export async function upsertLeadMagnetContact(payload: {
   email: string
   firstName?: string | null
+  acquisitionSource?: string | null
   moonSign?: string | null
   reportId?: string | null
 }) {
@@ -134,6 +148,7 @@ export async function upsertLeadMagnetContact(payload: {
     .values({
       email: normalizedEmail,
       firstName: payload.firstName || null,
+      acquisitionSource: payload.acquisitionSource || null,
       moonSign: payload.moonSign || null,
       reportId: payload.reportId || null,
       currentStep: 0,
@@ -145,6 +160,7 @@ export async function upsertLeadMagnetContact(payload: {
       target: leadMagnetContacts.email,
       set: {
         firstName: payload.firstName || null,
+        acquisitionSource: sql`COALESCE(${leadMagnetContacts.acquisitionSource}, ${payload.acquisitionSource || null})`,
         moonSign: payload.moonSign || null,
         reportId: payload.reportId || null,
         updatedAt: now,
@@ -365,6 +381,7 @@ export async function getLeadSequenceDashboard(limit = 100): Promise<{
     id: row.id,
     email: row.email,
     firstName: row.firstName,
+    acquisitionSource: row.acquisitionSource,
     currentStep: row.currentStep,
     sentEmailsCount: row.sentEmailsCount,
     converted: row.converted,
@@ -385,6 +402,84 @@ export async function getLeadSequenceDashboard(limit = 100): Promise<{
     },
     contacts,
   }
+}
+
+function formatDayIso(date: Date): string {
+  return date.toISOString().slice(0, 10)
+}
+
+function startOfUtcDay(date: Date): Date {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()))
+}
+
+export async function getLeadGrowthSeries(days = 14): Promise<DashboardGrowthPoint[]> {
+  const db = getDbOrThrow()
+  const dayCount = Math.min(Math.max(Number(days || 14), 1), 60)
+
+  const todayStart = startOfUtcDay(new Date())
+  const startDate = new Date(todayStart)
+  startDate.setUTCDate(startDate.getUTCDate() - (dayCount - 1))
+
+  const rows = await db
+    .select({
+      day: sql<string>`to_char(${leadMagnetContacts.createdAt}::date, 'YYYY-MM-DD')`,
+      totalContacts: sql<number>`count(*)`,
+      convertedContacts: sql<number>`count(*) FILTER (WHERE ${leadMagnetContacts.converted} = true)`,
+    })
+    .from(leadMagnetContacts)
+    .where(sql`${leadMagnetContacts.createdAt} >= ${startDate}`)
+    .groupBy(sql`${leadMagnetContacts.createdAt}::date`)
+    .orderBy(sql`${leadMagnetContacts.createdAt}::date asc`)
+
+  const rowByDay = new Map(
+    rows.map((row) => [
+      String(row.day),
+      {
+        totalContacts: Number(row.totalContacts || 0),
+        convertedContacts: Number(row.convertedContacts || 0),
+      },
+    ]),
+  )
+
+  const output: DashboardGrowthPoint[] = []
+  for (let i = 0; i < dayCount; i += 1) {
+    const dayDate = new Date(startDate)
+    dayDate.setUTCDate(startDate.getUTCDate() + i)
+    const day = formatDayIso(dayDate)
+    const row = rowByDay.get(day)
+
+    output.push({
+      day,
+      totalContacts: row?.totalContacts || 0,
+      convertedContacts: row?.convertedContacts || 0,
+    })
+  }
+
+  return output
+}
+
+export async function getLeadSourceBreakdown(limit = 12): Promise<DashboardSourceRow[]> {
+  const db = getDbOrThrow()
+  const rowLimit = Math.min(Math.max(Number(limit || 12), 1), 50)
+
+  const sourceExpr = sql<string>`COALESCE(NULLIF(TRIM(${leadMagnetContacts.acquisitionSource}), ''), 'direct')`
+
+  const rows = await db
+    .select({
+      source: sourceExpr,
+      totalContacts: sql<number>`count(*)`,
+      convertedContacts: sql<number>`count(*) FILTER (WHERE ${leadMagnetContacts.converted} = true)`,
+    })
+    .from(leadMagnetContacts)
+    .groupBy(sourceExpr)
+    .orderBy(sql`count(*) desc`, sourceExpr)
+    .limit(rowLimit)
+
+  return rows.map((row) => ({
+    source: String(row.source || 'direct'),
+    totalContacts: Number(row.totalContacts || 0),
+    convertedContacts: Number(row.convertedContacts || 0),
+  }))
 }
 
 export async function getLeadEmailEvents(contactIds: string[]) {

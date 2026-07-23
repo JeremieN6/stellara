@@ -1,28 +1,11 @@
-import { getLeadEmailEvents, getLeadSequenceDashboard, getLatestSentStepByContact } from '../../../utils/lead-sequence'
-
-function assertAdminAccess(event: Parameters<typeof defineEventHandler>[0]) {
-  const config = useRuntimeConfig(event)
-  const expectedToken = String(config.adminToken || '').trim()
-
-  if (!expectedToken) {
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'ADMIN_TOKEN is not configured.',
-    })
-  }
-
-  const authHeader = getHeader(event, 'authorization') || ''
-  const bearer = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : ''
-  const queryToken = String(getQuery(event).token || '').trim()
-  const provided = bearer || queryToken
-
-  if (!provided || provided !== expectedToken) {
-    throw createError({
-      statusCode: 401,
-      statusMessage: 'Unauthorized admin access.',
-    })
-  }
-}
+import { assertAdminAccess } from '../../../utils/admin-auth'
+import {
+  getLeadEmailEvents,
+  getLeadGrowthSeries,
+  getLatestSentStepByContact,
+  getLeadSequenceDashboard,
+  getLeadSourceBreakdown,
+} from '../../../utils/lead-sequence'
 
 export default defineEventHandler(async (event) => {
   assertAdminAccess(event)
@@ -36,6 +19,11 @@ export default defineEventHandler(async (event) => {
   const [events, latestSteps] = await Promise.all([
     getLeadEmailEvents(contactIds),
     getLatestSentStepByContact(contactIds),
+  ])
+
+  const [growthSeries, sourceBreakdown] = await Promise.all([
+    getLeadGrowthSeries(14),
+    getLeadSourceBreakdown(12),
   ])
 
   const latestByContact = new Map(latestSteps.map((row) => [row.contactId, Number(row.maxStep)]))
@@ -64,6 +52,8 @@ export default defineEventHandler(async (event) => {
 
   return {
     stats: dashboard.stats,
+    growthSeries,
+    sourceBreakdown,
     contacts: dashboard.contacts.map((contact) => ({
       ...contact,
       latestSentStep: latestByContact.get(contact.id) ?? null,

@@ -154,11 +154,16 @@ useSeoMeta({
 })
 
 const reportStore = useReportStore()
+const route = useRoute()
 const step = ref(0)
 const calculating = ref(false)
 const unknownBirthTime = ref(false)
 
+const LEAD_SOURCE_STORAGE_KEY = 'stellara_lead_source'
+
 onMounted(async () => {
+  persistLeadSourceFromEntry()
+
   reportStore.initFromStorage()
 
   if (reportStore.reportData) {
@@ -177,6 +182,66 @@ onMounted(async () => {
     await reportStore.syncPremiumStatusFromServer(reportStore.userEmail)
   }
 })
+
+function normalizeLeadSource(value: unknown): string | null {
+  const raw = String(value || '').trim().toLowerCase()
+  if (!raw) return null
+
+  const cleaned = raw
+    .replace(/\s+/g, '_')
+    .replace(/[^a-z0-9_:\/-]/g, '')
+    .slice(0, 120)
+
+  return cleaned || null
+}
+
+function persistLeadSourceFromEntry() {
+  if (!import.meta.client) return
+
+  const fromQuery = normalizeLeadSource(
+    route.query.src
+      || route.query.source
+      || route.query.utm_source
+      || route.query.ref,
+  )
+
+  if (fromQuery) {
+    localStorage.setItem(LEAD_SOURCE_STORAGE_KEY, fromQuery)
+    return
+  }
+
+  const existing = normalizeLeadSource(localStorage.getItem(LEAD_SOURCE_STORAGE_KEY))
+  if (existing) return
+
+  const referrer = String(document.referrer || '').trim()
+  if (!referrer) {
+    localStorage.setItem(LEAD_SOURCE_STORAGE_KEY, 'direct')
+    return
+  }
+
+  try {
+    const parsed = new URL(referrer)
+    const source = normalizeLeadSource(`ref:${parsed.hostname}`) || 'direct'
+    localStorage.setItem(LEAD_SOURCE_STORAGE_KEY, source)
+  } catch {
+    localStorage.setItem(LEAD_SOURCE_STORAGE_KEY, 'direct')
+  }
+}
+
+function resolveLeadSourceForCapture(): string {
+  const fromQuery = normalizeLeadSource(
+    route.query.src
+      || route.query.source
+      || route.query.utm_source
+      || route.query.ref,
+  )
+
+  if (fromQuery) return fromQuery
+  if (!import.meta.client) return 'direct'
+
+  const fromStorage = normalizeLeadSource(localStorage.getItem(LEAD_SOURCE_STORAGE_KEY))
+  return fromStorage || 'direct'
+}
 
 const form = reactive({
   firstName: '',
@@ -353,6 +418,7 @@ function startNewReport() {
 async function handleCaptureEmail(email: string) {
   const normalizedEmail = email.trim().toLowerCase()
   if (!normalizedEmail) return
+  const acquisitionSource = resolveLeadSourceForCapture()
 
   reportStore.setUserEmail(normalizedEmail)
   await reportStore.syncPremiumStatusFromServer(normalizedEmail)
@@ -377,6 +443,7 @@ async function handleCaptureEmail(email: string) {
       body: {
         reportId,
         email: normalizedEmail,
+        acquisitionSource,
         previewPayload,
       },
     }) as {
