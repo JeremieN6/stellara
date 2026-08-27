@@ -103,6 +103,8 @@ utilisateurs, abonnes, et affilies.
 > 2026-08-09: Article de blog detaille sur l'eclipse solaire du 12 aout 2026 (conseils d'observation + eclairage astrologique), dans la continuite de la strategie de contenu SEO/acquisition du blog.
 >
 > 2026-08-27: Remise a niveau de la memoire projet (CLAUDE.md). Ecart de 2 mois entre la derniere mise a jour (2026-06-23) et le dernier commit (2026-08-09) : 27 commits non refletes couvrant l'auth magic link, l'affiliation, l'horoscope via Astrology API, le lexique astro, le SEO/sitemap, la fiabilisation du deploiement, et le tracking d'acquisition. Contenu verifie contre `git log`, `db/schema.ts`, `drizzle/`, `package.json` et l'arborescence `server/`. Creation de STORY.md en parallele.
+>
+> 2026-08-27 (suite): Ajout d'un hook `Stop` scope au projet (`.claude/settings.json` + `.claude/hooks/memory-reminder.sh`, commit dans le repo). A chaque fin de tour, il compare les commits de code (hors CLAUDE.md/STORY.md/tasks/lessons.md) et les modifications non commitees depuis le dernier commit ayant touche un de ces fichiers memoire ; s'il y a du travail non reflete, il bloque une fois avec un rappel injecte dans le contexte de l'agent (une empreinte hors-repo dans `~/.claude/memory-hook-state/` evite tout re-declenchement sur un etat identique). Contrairement au hook global evoque dans le prompt de mise a jour memoire, celui-ci est local a stellara et ne s'applique a aucun autre projet.
 
 ---
 
