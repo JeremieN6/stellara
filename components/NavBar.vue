@@ -230,6 +230,7 @@ const navLinks = [
 ]
 
 const resourceLinks = [
+  { href: '/theme-astral-ia', label: 'Thème astral IA' },
   { href: '/lexique', label: 'Lexique astro' },
   { href: '/signes-astrologiques', label: 'Signes astrologiques' },
 ]

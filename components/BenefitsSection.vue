@@ -7,7 +7,11 @@
         L'astrologie de précision, accessible à tous
       </h2>
       <p class="reveal-on-scroll mx-auto mt-6 max-w-2xl text-lg text-slate-300">
-        Contrairement aux horoscopes génériques, votre thème natal révèle qui vous êtes vraiment.
+        Contrairement aux horoscopes génériques, votre
+        <NuxtLink to="/theme-astral-ia" class="text-amber-400 underline decoration-amber-400/40 underline-offset-4 transition hover:text-amber-300">
+          thème astral IA
+        </NuxtLink>
+        révèle qui vous êtes vraiment.
       </p>
     </div>
 
