@@ -31,10 +31,11 @@ export function useSiteUrl() {
       return requestOrigin
     }
 
-    if (configuredUrl) {
-      return configuredUrl
-    }
-
+    // Both the configured value and the request origin look like
+    // localhost (e.g. testing directly against the Node process via
+    // 127.0.0.1, bypassing any reverse proxy) -- returning either one
+    // here would just hand back a localhost URL. Go straight to the
+    // hardcoded prod fallback instead.
     return fallbackUrl
   })
 }
