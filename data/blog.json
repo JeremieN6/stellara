@@ -1,5 +1,101 @@
 [
   {
+    "slug": "comprendre-transits-planetaires-theme-natal",
+    "titre": "Comprendre les transits planétaires et les lire dans votre thème natal",
+    "intro": "Un transit planétaire, c'est la position du ciel aujourd'hui mise en dialogue avec votre thème de naissance. Apprendre à le lire permet de repérer les fenêtres favorables à une décision amoureuse, professionnelle ou personnelle, sans tomber dans la prédiction absolue.",
+    "date": "2026-09-17",
+    "image": "🪐",
+    "metaDescription": "Transits planétaires : définition, calcul par rapport au thème natal, interprétation des aspects majeurs et méthode pour repérer les bonnes périodes.",
+    "sections": [
+      {
+        "sous_titre": "Qu'est-ce qu'un transit planétaire, en une phrase claire",
+        "contenu": "Un transit désigne la position actuelle d'une planète dans le ciel, comparée à la position qu'elle occupait au moment de votre naissance. Votre thème natal reste fixe ; ce sont les planètes en mouvement aujourd'hui qui viennent former des aspects avec vos points natals, Soleil, Lune, Vénus ou tout autre élément de votre carte."
+      },
+      {
+        "sous_titre": "Comment un transit se calcule par rapport à votre thème natal",
+        "contenu": "Le calcul superpose deux cartes du ciel : la position des planètes au jour J (aujourd'hui, ou une date future) et la position figée de votre thème de naissance. Quand une planète en mouvement atteint un angle précis avec une planète natale, par exemple 90° pour un carré ou 120° pour un trigone, le transit est dit « actif ». C'est la même logique que la synastrie entre deux personnes, appliquée cette fois entre vous et le ciel du moment."
+      },
+      {
+        "sous_titre": "Les cinq aspects majeurs à connaître",
+        "contenu": "La conjonction (0°) marque un déclenchement, un nouveau départ autour du thème concerné. Le carré (90°) crée une tension productive qui pousse à agir ou à trancher. L'opposition (180°) met deux besoins face à face et demande un choix conscient. Le trigone (120°) apporte de la fluidité et facilite naturellement les choses. Le sextile (60°) ouvre une opportunité qui demande d'être activée, sans se présenter d'elle-même."
+      },
+      {
+        "sous_titre": "Exemple concret : un transit qui active un cycle favorable",
+        "contenu": "Extrait anonymisé d'un suivi Stellara : « Jupiter transite en trigone avec votre Soleil natal : c'est une période propice pour visibiliser un projet, demander ce que vous n'osiez pas demander, ou accepter une opportunité qui semblait trop belle. » Un trigone de Jupiter n'apporte rien tout seul : il élargit la marge de manœuvre pour ce que vous entreprenez déjà."
+      },
+      {
+        "sous_titre": "Exemple concret : un transit qui demande de la vigilance",
+        "contenu": "Extrait anonymisé : « Saturne transite en carré à votre Lune natale : vos besoins émotionnels se heurtent à des contraintes réelles (charge, responsabilités, fatigue). Ce climat n'annonce pas un problème, mais réclame de la structure plutôt que de l'évitement. » Ce type de transit se traverse mieux qu'il ne se subit, à condition d'être identifié à l'avance."
+      },
+      {
+        "sous_titre": "Méthode pas à pas pour repérer une période propice à une décision",
+        "contenu": "1) Identifiez la planète natale concernée par votre question (Vénus pour une décision amoureuse, Soleil ou Milieu du Ciel pour une décision professionnelle). 2) Repérez les transits en cours ou à venir sur ce point précis. 3) Regardez la nature de l'aspect : trigone et sextile invitent à avancer, carré et opposition demandent de clarifier avant d'agir, conjonction marque un vrai point de départ. 4) Croisez avec la vitesse de la planète en transit : plus elle est lente, plus la fenêtre dure. 5) Choisissez d'agir dans la fenêtre la plus cohérente plutôt que d'attendre un jour parfait qui n'existe pas."
+      },
+      {
+        "sous_titre": "Transits rapides et transits lents : deux échelles de temps à ne pas confondre",
+        "contenu": "La Lune, Mercure, Vénus et Mars forment des transits rapides, actifs de quelques jours à quelques semaines : ils colorent une ambiance ponctuelle. Jupiter, Saturne, Uranus, Neptune et Pluton forment des transits lents, actifs plusieurs mois voire plusieurs années : ils marquent de vraies phases de vie. Confondre les deux échelles est l'erreur la plus fréquente en lecture de transits."
+      },
+      {
+        "sous_titre": "Lire une fenêtre plutôt qu'un jour isolé",
+        "contenu": "Un transit n'agit pas comme un interrupteur qui s'allume et s'éteint d'un coup. Il monte en intensité, culmine à l'aspect exact, puis redescend progressivement. Raisonner en fenêtre de plusieurs jours ou semaines, plutôt qu'en date unique, donne une lecture beaucoup plus juste que de chercher « le bon jour » au sens strict."
+      },
+      {
+        "sous_titre": "Ce qu'un transit ne fait pas : il ne décide rien à votre place",
+        "contenu": "Un transit décrit un climat, pas une obligation. Un carré ne condamne pas une décision, il signale simplement qu'elle demandera plus d'effort ou de clarté. Un trigone ne garantit pas un succès, il retire seulement une part de friction. L'intérêt réel des transits est de mieux calibrer votre énergie et votre vigilance, pas de vous dédouaner de votre propre jugement."
+      },
+      {
+        "sous_titre": "Comment Stellara vous aide à suivre vos transits",
+        "contenu": "Le rapport essentiel gratuit de Stellara pose la base indispensable : vos positions natales exactes (Soleil, Lune, Ascendant), sans lesquelles aucun transit ne peut être interprété correctement. Le suivi mensuel de l'abonnement Orbite Premium prend ensuite le relais avec la lecture de vos transits majeurs, l'influence des planètes lentes sur vos grands cycles et des alertes personnalisées quand une fenêtre importante s'ouvre. C'est la façon la plus simple de passer d'une notion abstraite à un vrai outil de décision au quotidien."
+      }
+    ]
+  },
+  {
+    "slug": "calculer-signe-lunaire-methode-pas-a-pas",
+    "titre": "Calculer votre signe lunaire pas à pas : méthode, exemples et vérification",
+    "intro": "Le signe lunaire est souvent plus difficile à calculer que le signe solaire, car la Lune change de signe tous les deux à trois jours. Voici la méthode pour l'obtenir correctement, les erreurs les plus fréquentes et comment vérifier que le résultat obtenu est fiable.",
+    "date": "2026-09-17",
+    "image": "🌙",
+    "metaDescription": "Comment calculer votre signe lunaire : méthode manuelle, outils fiables, erreurs fréquentes et vérification, avec le calcul instantané de Stellara.",
+    "sections": [
+      {
+        "sous_titre": "Le signe lunaire, en une définition claire",
+        "contenu": "Le signe lunaire indique la position de la Lune au moment exact de votre naissance. Il décrit vos besoins émotionnels, vos réflexes instinctifs et la manière dont vous cherchez à vous sentir en sécurité, là où le signe solaire décrit plutôt votre identité consciente et affichée."
+      },
+      {
+        "sous_titre": "Pourquoi la Lune est plus difficile à calculer que le Soleil",
+        "contenu": "Le Soleil ne change de signe qu'une fois par mois environ et reste donc identique toute une journée de naissance. La Lune, elle, se déplace d'environ 13° par jour et change de signe tous les deux à trois jours : selon l'heure exacte de votre naissance, vous pouvez basculer d'un signe lunaire à un autre au cours de la même journée. C'est ce qui rend le calcul manuel nettement plus exigeant."
+      },
+      {
+        "sous_titre": "Ce qu'il faut réunir avant de calculer",
+        "contenu": "Quatre éléments sont nécessaires : la date de naissance, l'heure de naissance la plus précise possible, le lieu de naissance (pour la longitude et la latitude), et le fuseau horaire en vigueur ce jour-là à cet endroit, heure d'été ou d'hiver comprise. Le moindre de ces éléments, mal renseigné, peut suffire à changer le résultat."
+      },
+      {
+        "sous_titre": "Méthode manuelle : les grandes étapes",
+        "contenu": "1) Convertissez l'heure locale de naissance en temps universel (UTC), en tenant compte du décalage horaire et de l'heure d'été si elle s'appliquait. 2) Consultez une éphéméride lunaire, qui liste la position de la Lune degré par degré pour chaque jour. 3) Repérez la position du jour de naissance, puis interpolez selon l'heure exacte, car la Lune continue d'avancer au fil des heures. 4) Vérifiez si cette position tombe près d'un changement de signe : c'est le moment le plus sensible à l'imprécision."
+      },
+      {
+        "sous_titre": "Pourquoi les outils en ligne restent plus fiables pour la précision",
+        "contenu": "Le calcul manuel avec une éphéméride reste faisable, mais il multiplie les sources d'erreur : conversion de fuseau horaire, interpolation, lecture d'éphéméride. Un outil en ligne fiable effectue ce même calcul de façon automatisée et cohérente, ce qui réduit fortement le risque d'erreur humaine sur une donnée qui change vite."
+      },
+      {
+        "sous_titre": "Erreurs fréquentes au moment du calcul",
+        "contenu": "Une heure de naissance arrondie (« vers midi », « en fin de matinée ») est la première source d'erreur : quelques minutes suffisent parfois à changer le résultat. Un fuseau horaire mal converti, notamment en oubliant l'heure d'été, en est une deuxième. Un lieu de naissance imprécis, surtout si la ville comporte plusieurs orthographes ou homonymes, en est une troisième. Enfin, être né juste avant ou après un changement de signe lunaire rend le résultat particulièrement sensible à ces trois premières erreurs cumulées."
+      },
+      {
+        "sous_titre": "Vérifier son résultat",
+        "contenu": "La première vérification consiste à recalculer avec une source différente et à comparer : si les deux convergent, la confiance augmente. La deuxième consiste à relire votre acte de naissance ou votre carnet de santé si l'heure indiquée semblait approximative. Se reconnaître ou non dans la description du signe obtenu peut orienter le doute, mais reste un indice faible : ce n'est jamais une preuve, seulement un signal à confirmer par les données de naissance elles-mêmes."
+      },
+      {
+        "sous_titre": "Exemple concret de lecture",
+        "contenu": "Extrait anonymisé d'un rapport Stellara : « Lune en Scorpion : vous vivez vos émotions avec intensité et discrétion à la fois, et vous avez besoin de contrôler le rythme auquel vous vous ouvrez aux autres. » Une fois le signe confirmé de façon fiable, cette lecture devient un repère utile pour comprendre vos réactions instinctives, notamment dans les moments de stress ou de proximité affective."
+      },
+      {
+        "sous_titre": "Calculer votre signe lunaire avec Stellara",
+        "contenu": "Le rapport essentiel gratuit de Stellara calcule votre signe lunaire en quelques secondes à partir de votre date, heure et lieu de naissance, sans convertisseur de fuseau horaire ni éphéméride à consulter à la main. Il l'intègre directement à un mini-portrait avec votre signe solaire et votre ascendant. Pour une interprétation plus approfondie de votre Lune, ses aspects avec les autres planètes et sa maison de résidence, la Carte Natale Intégrale complète cette première lecture."
+      }
+    ]
+  },
+  {
     "slug": "theme-astral-gratuit-guide-pas-a-pas",
     "titre": "Obtenir et interpréter votre thème astral gratuit : guide pas à pas",
     "intro": "Un thème astral gratuit peut donner, en quelques secondes, des repères fiables sur votre signe solaire, votre signe lunaire et votre ascendant. Voici comment l'obtenir correctement et lire ce qu'il contient vraiment, sans confondre mini-rapport et thème complet.",
@@ -51,7 +147,7 @@
     "intro": "Comparer deux thèmes natals ne se limite pas à mettre côte à côte deux signes solaires. La synastrie et le thème composite sont les deux outils de l'astrologie relationnelle qui permettent de vraiment lire l'attraction, la communication et la solidité d'un couple.",
     "date": "2026-09-15",
     "image": "💞",
-    "metaDescription": "Synastrie, thème composite, Vénus, Lune : la méthode pas à pas pour analyser la compatibilité amoureuse entre deux thèmes natals.",
+    "metaDescription": "Synastrie, thème composite, classement des signes les plus compatibles en amour : la méthode pas à pas pour analyser une compatibilité amoureuse.",
     "sections": [
       {
         "sous_titre": "Pourquoi la compatibilité amoureuse ne se lit pas sur un seul thème",
@@ -72,6 +168,10 @@
       {
         "sous_titre": "Les points clés à observer : Soleil, Lune, Vénus et les angles",
         "contenu": "Le Soleil parle de reconnaissance et d'identité : se sent-on vu et valorisé par l'autre. La Lune concerne la sécurité émotionnelle et les habitudes affectives, souvent le vrai baromètre de longévité d'un couple. Vénus indique l'attraction, les valeurs partagées et la façon d'aimer. Les angles, Ascendant-Descendant et Milieu du Ciel-Fond du Ciel, situent la première impression et l'axe d'un projet commun."
+      },
+      {
+        "sous_titre": "Classement des signes les plus compatibles en amour : à prendre comme une tendance, pas une règle",
+        "contenu": "Les classements de signes les plus compatibles s'appuient surtout sur les éléments : deux signes de feu (Bélier, Lion, Sagittaire) ou deux signes d'eau (Cancer, Scorpion, Poissons) se comprennent souvent vite parce qu'ils partagent le même tempo émotionnel. Les couples feu-air (par exemple Lion-Balance) ou terre-eau (Taureau-Cancer) sont classés parmi les plus fluides, car chaque élément nourrit l'autre plutôt que de l'éteindre. À l'inverse, deux éléments opposés comme feu et eau demandent plus d'ajustements, sans être pour autant incompatibles. Ce classement reste un raccourci utile pour une première lecture : la synastrie détaillée ci-dessous affine toujours ce constat général à partir de vos positions réelles, Vénus et Lune en tête."
       },
       {
         "sous_titre": "Méthode pas à pas pour lire une carte de compatibilité",
