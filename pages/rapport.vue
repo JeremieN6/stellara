@@ -153,6 +153,17 @@ useSeoMeta({
   description: 'Calculez votre thème natal complet avec signe solaire, lunaire, ascendant et 10 planètes analysés par IA.',
 })
 
+const safeSiteUrl = useSiteUrl()
+
+useHead(() => ({
+  link: [
+    {
+      rel: 'canonical',
+      href: `${safeSiteUrl.value}/rapport`,
+    },
+  ],
+}))
+
 const reportStore = useReportStore()
 const route = useRoute()
 const step = ref(0)

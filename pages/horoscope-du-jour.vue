@@ -94,6 +94,17 @@ useSeoMeta({
   description: 'Horoscope du jour gratuit par signe solaire et aperçu premium basé sur vos transits personnels.',
 })
 
+const safeSiteUrl = useSiteUrl()
+
+useHead(() => ({
+  link: [
+    {
+      rel: 'canonical',
+      href: `${safeSiteUrl.value}/horoscope-du-jour`,
+    },
+  ],
+}))
+
 type SignValue =
   | 'belier'
   | 'taureau'

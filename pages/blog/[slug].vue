@@ -77,7 +77,6 @@ type BlogPost = {
 }
 
 const route = useRoute()
-const config = useRuntimeConfig()
 
 const normalizedSlug = computed(() => {
   const slugParam = route.params.slug
@@ -97,12 +96,7 @@ const post = computed<BlogPost | null>(() => {
   return allPosts.value.find((entry) => String(entry.slug || '').toLowerCase() === normalizedSlug.value) || null
 })
 
-const safeSiteUrl = computed(() => {
-  const configuredUrl = String(config.public?.siteUrl || '').trim()
-  const fallbackUrl = 'https://stellara.sassify.fr'
-  const baseUrl = configuredUrl || fallbackUrl
-  return baseUrl.replace(/\/+$/, '')
-})
+const safeSiteUrl = useSiteUrl()
 
 const postSections = computed<BlogSection[]>(() => {
   return Array.isArray(post.value?.sections) ? post.value.sections : []
@@ -115,14 +109,17 @@ if (!post.value) {
   })
 }
 
-useSeoMeta(() => ({
-  title: `${post.value?.titre} | Blog Stellara`,
-  description: post.value?.metaDescription || post.value?.intro || 'Article du blog Stellara.',
-  ogTitle: post.value?.titre || 'Blog Stellara',
-  ogDescription: post.value?.metaDescription || post.value?.intro || 'Article du blog Stellara.',
+const seoTitle = computed(() => `${post.value?.titre} | Blog Stellara`)
+const seoDescription = computed(() => post.value?.metaDescription || post.value?.intro || 'Article du blog Stellara.')
+
+useSeoMeta({
+  title: seoTitle,
+  description: seoDescription,
+  ogTitle: computed(() => post.value?.titre || 'Blog Stellara'),
+  ogDescription: seoDescription,
   ogType: 'article',
   twitterCard: 'summary_large_image',
-}))
+})
 
 useHead(() => ({
   link: [

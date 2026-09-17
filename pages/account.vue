@@ -173,7 +173,19 @@
 useSeoMeta({
   title: 'Mon compte — Stellara',
   description: 'Consultez votre statut premium et vos informations d abonnement Stellara.',
+  robots: 'noindex',
 })
+
+const safeSiteUrl = useSiteUrl()
+
+useHead(() => ({
+  link: [
+    {
+      rel: 'canonical',
+      href: `${safeSiteUrl.value}/account`,
+    },
+  ],
+}))
 
 type ProfileResponse = {
   user: {

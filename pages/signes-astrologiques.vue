@@ -91,6 +91,17 @@ useSeoMeta({
   description: 'Découvrez les 12 signes astrologiques simplement: traits profonds, forces, vigilance et dynamique relationnelle pour debuter en astrologie.',
 })
 
+const safeSiteUrl = useSiteUrl()
+
+useHead(() => ({
+  link: [
+    {
+      rel: 'canonical',
+      href: `${safeSiteUrl.value}/signes-astrologiques`,
+    },
+  ],
+}))
+
 type SignSlug =
   | 'belier'
   | 'taureau'

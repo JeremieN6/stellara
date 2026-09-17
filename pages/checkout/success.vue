@@ -31,7 +31,21 @@
 import { onMounted, useHead, navigateTo } from '#imports'
 import { useReportStore } from '~/stores/report'
 
-useHead({ title: 'Paiement réussi — Stellara' })
+const safeSiteUrl = useSiteUrl()
+
+useSeoMeta({
+  title: 'Paiement réussi — Stellara',
+  robots: 'noindex',
+})
+
+useHead(() => ({
+  link: [
+    {
+      rel: 'canonical',
+      href: `${safeSiteUrl.value}/checkout/success`,
+    },
+  ],
+}))
 
 const reportStore = useReportStore()
 const route = useRoute()

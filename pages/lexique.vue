@@ -76,6 +76,17 @@ useSeoMeta({
   description: "Lexique clair pour comprendre transit astrologique signification, qu'est-ce qu'un aspect en astrologie et ascendant astrologie signification.",
 })
 
+const safeSiteUrl = useSiteUrl()
+
+useHead(() => ({
+  link: [
+    {
+      rel: 'canonical',
+      href: `${safeSiteUrl.value}/lexique`,
+    },
+  ],
+}))
+
 type LexiconId =
   | 'theme-natal'
   | 'ascendant'

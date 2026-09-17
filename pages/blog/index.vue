@@ -82,6 +82,17 @@ useSeoMeta({
   twitterCard: 'summary_large_image',
 })
 
+const safeSiteUrl = useSiteUrl()
+
+useHead(() => ({
+  link: [
+    {
+      rel: 'canonical',
+      href: `${safeSiteUrl.value}/blog`,
+    },
+  ],
+}))
+
 function formatDate(dateValue: string) {
   return new Intl.DateTimeFormat('fr-FR', {
     day: '2-digit',

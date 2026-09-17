@@ -9,14 +9,17 @@ type BlogEntry = {
 
 const FALLBACK_STATIC_ROUTES = [
   '/',
-  '/account',
   '/horoscope-du-jour',
   '/lexique',
   '/mentions-legales',
   '/rapport',
   '/blog',
-  '/checkout/success',
 ]
+
+// Pages excluded from the sitemap even though they are plain, non-dynamic
+// routes under pages/: private/authenticated pages (/account) or
+// transactional pages with no SEO value (/checkout/success).
+const EXCLUDED_ROUTES = new Set(['/account', '/checkout/success'])
 
 function normalizeBaseUrl(event: Parameters<typeof useRuntimeConfig>[0]): string {
   const config = useRuntimeConfig(event)
@@ -71,6 +74,7 @@ function pageFileToRoute(filePath: string): string | null {
   if (route.includes('[') || route.includes(']')) return null
   if (route === '/admin' || route.startsWith('/admin/')) return null
   if (route === '/api' || route.startsWith('/api/')) return null
+  if (EXCLUDED_ROUTES.has(route)) return null
 
   return route
 }
