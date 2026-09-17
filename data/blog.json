@@ -1,5 +1,51 @@
 [
   {
+    "slug": "signe-ascendant-astrologie-difference-signe-solaire",
+    "titre": "Signe ascendant ou signe solaire : quelle différence en astrologie et pourquoi cela change votre portrait",
+    "intro": "Le signe solaire dit qui vous êtes au fond. L'ascendant dit comment vous entrez dans une pièce. Comprendre la différence entre les deux, et savoir calculer le sien avec précision, change souvent complètement la lecture qu'on fait de sa personnalité.",
+    "date": "2026-09-17",
+    "image": "🌅",
+    "metaDescription": "Signe ascendant en astrologie : définition, calcul à partir de l'heure de naissance, différence avec le signe solaire et mini-profils par ascendant.",
+    "sections": [
+      {
+        "sous_titre": "Trois piliers, trois rôles bien distincts",
+        "contenu": "Le signe solaire décrit votre identité de fond, ce qui vous définit indépendamment du contexte. Le signe lunaire décrit vos besoins émotionnels et vos réflexes instinctifs, souvent invisibles de l'extérieur. L'ascendant, lui, décrit votre posture d'entrée en relation : la façon dont vous abordez une situation nouvelle avant même d'avoir eu le temps de vous exprimer pleinement."
+      },
+      {
+        "sous_titre": "Qu'est-ce que l'ascendant, concrètement",
+        "contenu": "L'ascendant correspond au signe du zodiaque qui se levait à l'horizon est, exactement au moment et au lieu de votre naissance. Contrairement au Soleil ou à la Lune, ce n'est pas la position d'un astre mais un point de l'espace, déterminé uniquement par l'heure et le lieu. C'est ce qui en fait la donnée la plus sensible à calculer correctement."
+      },
+      {
+        "sous_titre": "Pourquoi l'ascendant change toutes les deux heures environ",
+        "contenu": "La Terre tourne sur elle-même en 24 heures, et l'horizon est balaie donc l'ensemble du zodiaque en une seule journée. Le signe solaire reste identique toute la journée de naissance, mais l'ascendant, lui, change de signe environ toutes les deux heures. Deux personnes nées le même jour, à quelques heures d'écart, peuvent donc avoir le même Soleil et un ascendant totalement différent."
+      },
+      {
+        "sous_titre": "La différence concrète avec le signe solaire",
+        "contenu": "Le signe solaire répond à la question « qui suis-je fondamentalement ». L'ascendant répond à « comment je me présente et comment on me perçoit au premier abord ». Une personne Soleil Cancer, sensible et intériorisée, avec un ascendant Lion, peut donner une première impression assurée et rayonnante, avant de révéler sa sensibilité une fois la confiance installée. C'est cet écart entre premier abord et identité profonde qui explique pourquoi certaines personnes se sentent mal représentées par leur seul signe solaire."
+      },
+      {
+        "sous_titre": "Mini-profils : ce que change l'ascendant selon le signe",
+        "contenu": "Ascendant Bélier : posture directe, décisions rapides, impatience visible dès les premiers échanges. Ascendant Cancer : accueil chaleureux mais prudent, besoin de sécuriser la relation avant de s'ouvrir. Ascendant Balance : diplomatie immédiate, souci de l'équilibre et de l'image renvoyée à l'autre, même sous tension. Ascendant Capricorne : réserve, sérieux et maîtrise de soi affichés en premier, la spontanéité venant seulement plus tard. Ces quatre exemples montrent à quel point l'ascendant colore la première impression sans jamais remplacer le reste du thème."
+      },
+      {
+        "sous_titre": "Exemple concret de lecture croisée",
+        "contenu": "Extrait anonymisé d'un rapport Stellara : « Soleil en Poissons, Ascendant Vierge : vous donnez une image structurée, précise et fiable, alors que votre monde intérieur reste beaucoup plus fluide, intuitif et sensible que ce que vous laissez paraître au premier contact. » C'est exactement ce type d'écart entre l'image donnée et l'identité de fond que l'ascendant permet de mettre en mots."
+      },
+      {
+        "sous_titre": "Comment trouver votre ascendant sans vous tromper",
+        "contenu": "Il faut réunir trois informations : votre date de naissance, votre heure de naissance la plus précise possible, et votre lieu de naissance exact (ville et pays). Ces trois données permettent de calculer la position réelle de l'horizon est au moment exact de votre naissance. Sans heure fiable, aucun calcul, manuel ou automatisé, ne peut donner un ascendant garanti correct."
+      },
+      {
+        "sous_titre": "L'erreur la plus fréquente : une heure de naissance approximative",
+        "contenu": "Une heure arrondie ou estimée « à peu près » reste la première cause d'ascendant erroné, surtout si votre naissance se situe près d'un changement de signe. En cas de doute, l'acte de naissance ou le carnet de santé restent les sources les plus fiables pour retrouver l'heure exacte avant de calculer quoi que ce soit."
+      },
+      {
+        "sous_titre": "Calculer votre ascendant avec Stellara",
+        "contenu": "Le rapport essentiel gratuit de Stellara calcule votre ascendant en quelques secondes à partir de votre date, heure et lieu de naissance, et l'intègre à un mini-portrait avec votre signe solaire et votre signe lunaire. Pour aller plus loin, la Carte Natale Intégrale détaille la maison où se trouve chaque planète par rapport à cet ascendant, ce qui affine considérablement la lecture de votre personnalité et de vos dynamiques de vie."
+      }
+    ]
+  },
+  {
     "slug": "comprendre-transits-planetaires-theme-natal",
     "titre": "Comprendre les transits planétaires et les lire dans votre thème natal",
     "intro": "Un transit planétaire, c'est la position du ciel aujourd'hui mise en dialogue avec votre thème de naissance. Apprendre à le lire permet de repérer les fenêtres favorables à une décision amoureuse, professionnelle ou personnelle, sans tomber dans la prédiction absolue.",
