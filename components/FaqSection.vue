@@ -89,7 +89,7 @@ const faqs = [
   },
   {
     question: 'Comment fonctionne l\'analyse par intelligence artificielle ?',
-    answer: 'Une fois vos positions planétaires calculées par notre moteur astrologique, nous envoyons un prompt structuré à GPT-4o qui synthétise ces données en un texte personnalisé. Stellara est guidée par sa base de connaissances en astrologie classique et moderne.',
+    answer: 'Une fois vos positions planétaires calculées par notre moteur astrologique, nous envoyons un prompt structuré à un modèle de langage avancé qui synthétise ces données en un texte personnalisé. Stellara est guidée par sa base de connaissances en astrologie classique et moderne.',
   },
   {
     question: 'Mes données sont-elles en sécurité ?',
