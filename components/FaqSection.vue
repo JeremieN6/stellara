@@ -87,10 +87,17 @@ const faqs = [
     question: 'Qu\'est-ce que le rapport premium contient de plus ?',
     answer: 'Le rapport complet inclut une interprétation approfondie de chaque planète dans son signe et sa maison, l\'analyse des aspects majeurs (conjonctions, oppositions, carrés, trigones), des conseils pratiques pour la vie amoureuse, professionnelle et spirituelle, ainsi qu\'un PDF téléchargeable.',
   },
+<<<<<<< HEAD
   {
     question: 'Comment fonctionne l\'analyse par intelligence artificielle ?',
     answer: 'Une fois vos positions planétaires calculées par notre moteur astrologique, nous envoyons un prompt structuré à un modèle de langage avancé qui synthétise ces données en un texte personnalisé. Stellara est guidée par sa base de connaissances en astrologie classique et moderne.',
   },
+=======
+  // {
+  //   question: 'Comment fonctionne l\'analyse par intelligence artificielle ?',
+  //   answer: 'Une fois vos positions planétaires calculées par notre moteur astrologique, nous envoyons un prompt structuré à GPT-4o qui synthétise ces données en un texte personnalisé. Stellara est guidée par sa base de connaissances en astrologie classique et moderne.',
+  // },
+>>>>>>> e503d38 (fix(faq): comment out AI analysis question in FAQ section)
   {
     question: 'Mes données sont-elles en sécurité ?',
     answer: 'Vos données de naissance sont chiffrées en transit (HTTPS) et ne sont jamais vendues à des tiers. Elles sont uniquement utilisées pour générer votre rapport et sont supprimées sur demande.',
