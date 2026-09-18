@@ -114,6 +114,23 @@
               </button>
             </form>
           </div>
+
+          <div class="mx-auto mt-10 max-w-2xl space-y-4 text-center">
+            <p class="text-sm leading-7 text-slate-400">
+              Un thème natal (ou thème astral) est la carte du ciel calculée au moment exact de
+              votre naissance : la position du Soleil, de la Lune, de l'ascendant et des planètes
+              réparties dans les 12 maisons astrologiques. Contrairement à un horoscope générique
+              basé uniquement sur votre signe solaire, cette carte est unique à chaque personne.
+            </p>
+            <p class="text-sm leading-7 text-slate-400">
+              Renseignez votre date, votre heure et votre lieu de naissance ci-dessus : Stellara
+              calcule vos positions planétaires exactes et génère un rapport essentiel gratuit
+              (signe solaire, lunaire, ascendant et mini-portrait) en quelques secondes, sans
+              inscription. Pour une analyse complète (10 planètes, 12 maisons, aspects et
+              compatibilité amoureuse), la Carte Natale Intégrale est disponible en paiement
+              unique.
+            </p>
+          </div>
         </div>
       </Transition>
 
@@ -149,7 +166,7 @@
 import ReportDisplay from '~/components/ReportDisplay.vue'
 
 useSeoMeta({
-  title: 'Mon Thème Natal — Stellara',
+  title: 'Thème Natal Gratuit en 30 Secondes — Stellara',
   description: 'Calculez votre thème natal complet avec signe solaire, lunaire, ascendant et 10 planètes analysés par IA.',
 })
 

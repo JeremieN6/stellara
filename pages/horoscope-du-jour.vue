@@ -83,6 +83,25 @@
             </p> -->
           </div>
         </div>
+
+        <div class="mx-auto mt-10 max-w-2xl space-y-4 text-center">
+          <p class="text-sm leading-7 text-slate-400">
+            L'horoscope du jour s'appuie sur la position réelle des planètes calculée
+            quotidiennement pour votre signe solaire : amour, travail, énergie et un conseil
+            concret à retenir. Contrairement à un horoscope générique répété chaque mois, la
+            lecture change chaque jour et reste mise en cache pour rester fiable et rapide.
+          </p>
+          <p class="text-sm leading-7 text-slate-400">
+            Pour aller plus loin, l'abonnement Orbite Premium croise cette lecture quotidienne
+            avec votre thème natal complet et vos transits personnels — un horoscope calculé pour
+            vous, pas seulement pour votre signe. Vous pouvez aussi générer votre
+            <NuxtLink to="/rapport" class="text-amber-400 underline decoration-amber-400/40 underline-offset-4 transition hover:text-amber-300">
+              thème natal gratuit
+            </NuxtLink>
+            pour obtenir votre signe lunaire et votre ascendant en complément de votre signe
+            solaire.
+          </p>
+        </div>
       </div>
     </div>
   </section>
@@ -90,7 +109,7 @@
 
 <script setup lang="ts">
 useSeoMeta({
-  title: 'Horoscope du jour - Stellara',
+  title: 'Horoscope du Jour Gratuit par Signe — Stellara',
   description: 'Horoscope du jour gratuit par signe solaire et aperçu premium basé sur vos transits personnels.',
 })
 
