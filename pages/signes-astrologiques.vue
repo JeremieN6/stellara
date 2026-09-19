@@ -37,12 +37,24 @@
           >
             <div class="flex items-center justify-between gap-3">
               <h2 class="font-display text-2xl text-white">
-                {{ sign.name }}
+                <NuxtLink :to="`/${sign.slug}`" class="transition hover:text-amber-300">
+                  {{ sign.name }}
+                </NuxtLink>
               </h2>
               <span class="rounded-full border border-white/20 bg-white/5 px-2.5 py-1 text-[11px] uppercase tracking-[0.12em] text-slate-300">
                 {{ sign.period }}
               </span>
             </div>
+
+            <NuxtLink
+              :to="`/${sign.slug}`"
+              class="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-amber-400 transition hover:text-amber-300"
+            >
+              Voir la page complète {{ sign.name }} et ascendant
+              <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+              </svg>
+            </NuxtLink>
 
             <p class="mt-3 text-xs uppercase tracking-[0.14em] text-amber-200">
               Element: {{ sign.element }} · Modalite: {{ sign.modality }}
