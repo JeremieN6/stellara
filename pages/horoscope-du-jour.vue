@@ -96,7 +96,7 @@
             avec votre thème natal complet et vos transits personnels — un horoscope calculé pour
             vous, pas seulement pour votre signe. Vous pouvez aussi générer votre
             <NuxtLink to="/rapport" class="text-amber-400 underline decoration-amber-400/40 underline-offset-4 transition hover:text-amber-300">
-              thème natal gratuit
+              thème astral gratuit
             </NuxtLink>
             pour obtenir votre signe lunaire et votre ascendant en complément de votre signe
             solaire.

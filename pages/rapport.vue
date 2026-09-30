@@ -4,13 +4,13 @@
       <Transition name="fade-up" mode="out-in">
         <div v-if="step === 0" key="form" class="mx-auto max-w-3xl">
           <header class="mb-8 text-center sm:mb-10">
-            <p class="eyebrow mb-3">Thème natal</p>
+            <p class="eyebrow mb-3">Thème astral gratuit</p>
             <h1 class="font-display text-4xl text-white sm:text-6xl">
-              Votre <span class="text-amber-300">carte du ciel</span>
+              Votre <span class="text-amber-300">thème astral gratuit</span>
             </h1>
             <p class="mx-auto mt-4 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
-              Découvrez les influences célestes qui guident votre chemin de vie,
-              vos relations et votre potentiel caché.
+              Calculez votre thème astral gratuit et découvrez les influences célestes
+              qui guident votre chemin de vie, vos relations et votre potentiel caché.
             </p>
             <div class="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-400 sm:gap-6">
               <span class="inline-flex items-center gap-2"><span class="text-amber-300">🔒</span> Données privées</span>
@@ -110,21 +110,25 @@
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
                 </svg>
-                <span>{{ calculating ? 'Calcul en cours...' : '✦ Calculer mon theme natal ✦' }}</span>
+                <span>{{ calculating ? 'Calcul en cours...' : '✦ Calculer mon thème astral gratuit ✦' }}</span>
               </button>
             </form>
           </div>
 
           <div class="mx-auto mt-10 max-w-2xl space-y-4 text-center">
+            <h2 class="font-display text-2xl text-white sm:text-3xl">
+              Qu'est-ce qu'un thème astral gratuit ?
+            </h2>
             <p class="text-sm leading-7 text-slate-400">
-              Un thème natal (ou thème astral) est la carte du ciel calculée au moment exact de
-              votre naissance : la position du Soleil, de la Lune, de l'ascendant et des planètes
-              réparties dans les 12 maisons astrologiques. Contrairement à un horoscope générique
-              basé uniquement sur votre signe solaire, cette carte est unique à chaque personne.
+              Un thème astral (aussi appelé thème natal) est la carte du ciel calculée au moment
+              exact de votre naissance : la position du Soleil, de la Lune, de l'ascendant et des
+              planètes réparties dans les 12 maisons astrologiques. Contrairement à un horoscope
+              générique basé uniquement sur votre signe solaire, cette carte est unique à chaque
+              personne.
             </p>
             <p class="text-sm leading-7 text-slate-400">
               Renseignez votre date, votre heure et votre lieu de naissance ci-dessus : Stellara
-              calcule vos positions planétaires exactes et génère un rapport essentiel gratuit
+              calcule vos positions planétaires exactes et génère votre thème astral gratuit
               (signe solaire, lunaire, ascendant et mini-portrait) en quelques secondes, sans
               inscription. Pour une analyse complète (10 planètes, 12 maisons, aspects et
               compatibilité amoureuse), la Carte Natale Intégrale est disponible en paiement
@@ -166,8 +170,8 @@
 import ReportDisplay from '~/components/ReportDisplay.vue'
 
 useSeoMeta({
-  title: 'Thème Natal Gratuit en 30 Secondes — Stellara',
-  description: 'Calculez votre thème natal complet avec signe solaire, lunaire, ascendant et 10 planètes analysés par IA.',
+  title: 'Thème Astral Gratuit en 30 Secondes — Stellara',
+  description: 'Obtenez votre thème astral gratuit en 30 secondes : signe solaire, lunaire, ascendant et positions planétaires analysés par IA, sans inscription.',
 })
 
 const safeSiteUrl = useSiteUrl()

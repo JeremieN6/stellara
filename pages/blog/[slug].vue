@@ -27,6 +27,10 @@
           </p>
         </header>
 
+        <div v-if="isLunarSignArticle" class="mt-10">
+          <MoonSignCalculator />
+        </div>
+
         <section class="mt-10 space-y-6">
           <article
             v-for="section in postSections"
@@ -101,6 +105,8 @@ const safeSiteUrl = useSiteUrl()
 const postSections = computed<BlogSection[]>(() => {
   return Array.isArray(post.value?.sections) ? post.value.sections : []
 })
+
+const isLunarSignArticle = computed(() => normalizedSlug.value === 'calculer-signe-lunaire-methode-pas-a-pas')
 
 if (!post.value) {
   throw createError({
