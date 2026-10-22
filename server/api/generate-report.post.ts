@@ -242,11 +242,11 @@ Format EXACT attendu:
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-3-5-sonnet-latest',
+        model: 'claude-sonnet-5-5',
         system: systemPrompt,
         messages: [{ role: 'user', content: [{ type: 'text', text: userPrompt }] }],
         max_tokens: 2200,
-        temperature: 0.3,
+        thinking: { type: 'between_tools' },
       }),
     })
 
@@ -304,11 +304,11 @@ async function generateClaudeSections(
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-3-5-sonnet-latest',
+        model: 'claude-sonnet-5-5',
         system: SECTIONS_SYSTEM_PROMPT,
         messages: [{ role: 'user', content: [{ type: 'text', text: userPrompt }] }],
         max_tokens: 2600,
-        temperature: 0.4,
+        thinking: { type: 'between_tools' },
       }),
     })
 
