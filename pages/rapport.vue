@@ -141,6 +141,13 @@
               </NuxtLink>
               indépendamment, pour un premier aperçu de vos besoins émotionnels avant de générer le thème complet.
             </p>
+            <p class="text-sm leading-7 text-slate-400">
+              Pour comprendre en détail comment Stellara génère ce thème grâce à l'intelligence
+              artificielle, consultez notre page dédiée au
+              <NuxtLink to="/theme-astral-ia" class="text-amber-400 underline decoration-amber-400/40 underline-offset-4 transition hover:text-amber-300">
+                thème astral IA
+              </NuxtLink>.
+            </p>
           </div>
         </div>
       </Transition>

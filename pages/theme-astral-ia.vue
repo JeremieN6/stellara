@@ -35,6 +35,26 @@
 
           <article class="glass-panel border border-white/10 p-6 sm:p-8">
             <h2 class="font-display text-2xl text-white sm:text-3xl">
+              Thème natal gratuit ou thème astral gratuit : même chose ?
+            </h2>
+            <p class="mt-4 text-base leading-8 text-slate-300">
+              Oui : "thème natal" et "thème astral" désignent exactement la même carte du ciel de
+              naissance, les deux termes sont utilisés indifféremment en astrologie francophone.
+              Que vous cherchiez un thème natal gratuit ou un thème astral gratuit, vous obtenez
+              ici le même calcul : la position réelle de vos planètes au moment de votre naissance,
+              analysée gratuitement en quelques secondes.
+            </p>
+            <p class="mt-4 text-base leading-8 text-slate-300">
+              Pour générer directement votre thème natal gratuit, rendez-vous sur le
+              <NuxtLink to="/rapport" class="text-amber-400 underline decoration-amber-400/40 underline-offset-4 transition hover:text-amber-300">
+                générateur de rapport
+              </NuxtLink>
+              : il suffit de renseigner votre date, heure et lieu de naissance.
+            </p>
+          </article>
+
+          <article class="glass-panel border border-white/10 p-6 sm:p-8">
+            <h2 class="font-display text-2xl text-white sm:text-3xl">
               Comment fonctionne l'analyse IA de Stellara
             </h2>
 
