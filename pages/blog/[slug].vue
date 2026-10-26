@@ -46,6 +46,17 @@
           </article>
         </section>
 
+        <aside v-if="isThemeAstralGuideArticle" class="mt-10 rounded-3xl border border-white/10 bg-white/5 p-6 text-slate-300 sm:p-8">
+          <p class="text-xs uppercase tracking-[0.3em] text-slate-400">À lire aussi</p>
+          <p class="mt-3 text-base leading-8 text-slate-300">
+            Le signe lunaire fait partie des trois piliers du thème gratuit. Pour l'obtenir isolément, vous pouvez
+            <NuxtLink to="/blog/calculer-signe-lunaire-methode-pas-a-pas" class="text-amber-400 underline decoration-amber-400/40 underline-offset-4 transition hover:text-amber-300">
+              calculer son signe lunaire
+            </NuxtLink>
+            directement, sans passer par le thème complet.
+          </p>
+        </aside>
+
         <aside class="mt-10 rounded-3xl border border-amber-400/20 bg-amber-400/10 p-6 text-slate-200 sm:p-8">
           <p class="text-xs uppercase tracking-[0.3em] text-amber-200">À retenir</p>
           <p class="mt-3 text-base leading-8 text-slate-200">
@@ -107,6 +118,7 @@ const postSections = computed<BlogSection[]>(() => {
 })
 
 const isLunarSignArticle = computed(() => normalizedSlug.value === 'calculer-signe-lunaire-methode-pas-a-pas')
+const isThemeAstralGuideArticle = computed(() => normalizedSlug.value === 'theme-astral-gratuit-guide-pas-a-pas')
 
 if (!post.value) {
   throw createError({

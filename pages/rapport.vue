@@ -134,6 +134,13 @@
               compatibilité amoureuse), la Carte Natale Intégrale est disponible en paiement
               unique.
             </p>
+            <p class="text-sm leading-7 text-slate-400">
+              Vous pouvez aussi
+              <NuxtLink to="/blog/calculer-signe-lunaire-methode-pas-a-pas" class="text-amber-400 underline decoration-amber-400/40 underline-offset-4 transition hover:text-amber-300">
+                calculer son signe lunaire
+              </NuxtLink>
+              indépendamment, pour un premier aperçu de vos besoins émotionnels avant de générer le thème complet.
+            </p>
           </div>
         </div>
       </Transition>
