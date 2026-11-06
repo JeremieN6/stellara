@@ -1,4 +1,5 @@
 import { buildNatalChart } from '../utils/astro'
+import { trackAnthropicResponse } from '../utils/opsCost'
 import { reports } from '../../db/schema'
 import { getDbIfConfigured } from '../utils/db'
 import {
@@ -240,12 +241,12 @@ Format EXACT attendu:
         'x-api-key': apiKey,
         'anthropic-version': '2023-06-01',
       },
+      // Sonnet 5.5 : pas de temperature/top_p/top_k (400) ; reflexion adaptative par defaut, d'ou le max_tokens eleve.
       body: JSON.stringify({
-        model: 'claude-3-5-sonnet-latest',
+        model: 'claude-sonnet-5-5',
         system: systemPrompt,
         messages: [{ role: 'user', content: [{ type: 'text', text: userPrompt }] }],
-        max_tokens: 2200,
-        temperature: 0.3,
+        max_tokens: 6000,
       }),
     })
 
@@ -257,6 +258,7 @@ Format EXACT attendu:
       content?: Array<{ type: string; text?: string }>
     }
 
+    trackAnthropicResponse('stellara', data, undefined, { feature: 'report-readings' })
     const rawText = data.content
       ?.filter((item) => item.type === 'text')
       .map((item) => item.text || '')
@@ -303,11 +305,10 @@ async function generateClaudeSections(
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-3-5-sonnet-latest',
+        model: 'claude-sonnet-5-5',
         system: SECTIONS_SYSTEM_PROMPT,
         messages: [{ role: 'user', content: [{ type: 'text', text: userPrompt }] }],
-        max_tokens: 2600,
-        temperature: 0.4,
+        max_tokens: 6000,
       }),
     })
 
@@ -319,6 +320,7 @@ async function generateClaudeSections(
       content?: Array<{ type: string; text?: string }>
     }
 
+    trackAnthropicResponse('stellara', data, undefined, { feature: 'report-sections' })
     const rawText = data.content
       ?.filter((item) => item.type === 'text')
       .map((item) => item.text || '')

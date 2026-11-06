@@ -127,6 +127,9 @@ utilisateurs, abonnes, et affilies.
 >
 > 2026-09-17 (suite 7) : Utilisateur confirme que c'etait bien une erreur. `components/FaqSection.vue` corrigee : la reponse "Comment fonctionne l'analyse par intelligence artificielle" ne mentionne plus GPT-4o, meme formulation neutre que sur `/theme-astral-ia` ("un modele de langage avance"). Verifie : plus aucune occurrence de "GPT-4o" dans le code source ni dans le bundle client build. Point ouvert pour une session future si l'utilisateur veut un jour communiquer publiquement le nom exact du modele utilise (Claude 3.5 Sonnet) : mettre a jour aux deux endroits (`FaqSection.vue` et `theme-astral-ia.vue`) en meme temps pour eviter une nouvelle divergence.
 
+>
+> 2026-11-06 (telemetrie Sassify Ops, branche `feat/ops-telemetry`) : les 4 appels de modeles (Anthropic x3, OpenAI de secours x1, tous en `fetch` brut) envoient leur usage a `pilotage` via `server/utils/opsCost.ts` (copie de `ops/clients/ops-cost.ts`, projet `stellara`) ; etape de notification de deploiement ajoutee a `deploy.yml`. Le processus lit `/etc/stellara/stellara.env` (via `start-stellara.sh`), PAS `.env.local` : `OPS_URL` / `OPS_INGEST_KEY` doivent y etre poses (acces root) apres fusion, avec les secrets GitHub du depot. CORRIGE : `generate-report.post.ts` appelait `claude-3-5-sonnet-latest` (Sonnet 3.5 retire le 2025-10-28, alias absent de la doc ; en cas d'echec le code retombe silencieusement sur le texte de secours, donc les rapports etaient peut-etre generiques sans erreur visible). Remplace par `claude-sonnet-5-5` avec `temperature` retire (refuse en 400 par ce modele) et `max_tokens` 6000 (reflexion adaptative par defaut). NON TESTE en reel : verifier apres deploiement qu'un rapport genere est bien personnalise (pas le texte de secours) et que les delais de 30 s / 35 s ne sont pas depasses. Aucun rapport genere ces 14 derniers jours. `.env.local` du VPS en 644 (a passer en 600).
+
 ---
 
 ## Regle de memoire narrative
