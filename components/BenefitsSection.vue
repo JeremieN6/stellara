@@ -11,7 +11,11 @@
         <NuxtLink to="/theme-astral-ia" class="text-amber-400 underline decoration-amber-400/40 underline-offset-4 transition hover:text-amber-300">
           thème astral IA
         </NuxtLink>
-        révèle qui vous êtes vraiment.
+        révèle qui vous êtes vraiment. Vous pouvez aussi
+        <NuxtLink to="/blog/calculer-signe-lunaire-methode-pas-a-pas" class="text-amber-400 underline decoration-amber-400/40 underline-offset-4 transition hover:text-amber-300">
+          calculer son signe lunaire
+        </NuxtLink>
+        gratuitement pour un premier aperçu.
       </p>
     </div>
 

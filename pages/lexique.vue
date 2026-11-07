@@ -65,6 +65,12 @@
             </Transition>
           </article>
         </div>
+
+        <div class="mt-10 flex flex-wrap items-center justify-center gap-4 text-center">
+          <NuxtLink to="/rapport" class="cta-button">
+            Calculer mon thème astral gratuit
+          </NuxtLink>
+        </div>
       </div>
     </div>
   </section>

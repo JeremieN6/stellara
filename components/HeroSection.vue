@@ -33,7 +33,7 @@
               <svg class="h-5 w-5 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <polygon points="12,2 15,9 22,9 16.5,13.5 18.5,21 12,17 5.5,21 7.5,13.5 2,9 9,9" />
               </svg>
-              Obtenir mon thème natal gratuit
+              Obtenir mon thème astral gratuit
             </NuxtLink>
 
             <NuxtLink
