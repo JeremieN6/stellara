@@ -1,3 +1,5 @@
+import { trackAnthropicResponse, trackOpenAIChatResponse } from '../utils/opsCost'
+
 type HoroscopeSign =
   | 'belier'
   | 'taureau'
@@ -167,6 +169,7 @@ async function localizeWithAnthropic(
     content?: Array<{ type?: string; text?: string }>
   }
 
+  trackAnthropicResponse('stellara', data, undefined, { feature: 'horoscope-localize' })
   const text = data.content
     ?.filter((item) => item.type === 'text' && typeof item.text === 'string')
     .map((item) => item.text as string)
@@ -225,6 +228,7 @@ async function localizeWithOpenAI(
   const data = (await res.json()) as {
     choices?: Array<{ message?: { content?: string } }>
   }
+  trackOpenAIChatResponse('stellara', data, undefined, { feature: 'horoscope-localize' })
   const content = data.choices?.[0]?.message?.content || ''
   const parsed = parseJsonFromModel(content)
   if (!parsed) {

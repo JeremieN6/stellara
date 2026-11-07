@@ -1,4 +1,5 @@
 import { buildNatalChart } from '../utils/astro'
+import { trackAnthropicResponse } from '../utils/opsCost'
 import { reports } from '../../db/schema'
 import { getDbIfConfigured } from '../utils/db'
 import {
@@ -258,6 +259,7 @@ Format EXACT attendu:
       content?: Array<{ type: string; text?: string }>
     }
 
+    trackAnthropicResponse('stellara', data, undefined, { feature: 'report-readings' })
     const rawText = data.content
       ?.filter((item) => item.type === 'text')
       .map((item) => item.text || '')
@@ -320,6 +322,7 @@ async function generateClaudeSections(
       content?: Array<{ type: string; text?: string }>
     }
 
+    trackAnthropicResponse('stellara', data, undefined, { feature: 'report-sections' })
     const rawText = data.content
       ?.filter((item) => item.type === 'text')
       .map((item) => item.text || '')
