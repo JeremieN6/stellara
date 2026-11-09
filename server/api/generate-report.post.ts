@@ -73,8 +73,8 @@ export default defineEventHandler(async (event) => {
   const apiKey = resolveAnthropicApiKey(config)
   if (apiKey) {
     const [readingsResult, sectionsResult] = await Promise.allSettled([
-      generateClaudeReadings(body, chart, apiKey, 30000),
-      generateClaudeSections(body, chart, apiKey, 35000),
+      generateClaudeReadings(body, chart, apiKey, 60000),
+      generateClaudeSections(body, chart, apiKey, 60000),
     ])
 
     if (readingsResult.status === 'fulfilled') {
@@ -145,7 +145,7 @@ async function generateClaudeReadings(
   user: ReportRequest,
   chart: ReturnType<typeof buildNatalChart>,
   apiKey: string,
-  timeoutMs = 30000,
+  timeoutMs = 60000,
 ): Promise<{ summary: string; houses: Record<string, string> }> {
   const houseContext = buildHouseContext(chart)
   const aspects = detectMajorAspects(chart)
@@ -243,11 +243,11 @@ Format EXACT attendu:
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-5-5',
+        model: 'claude-haiku-4-5-20251001',
         system: systemPrompt,
         messages: [{ role: 'user', content: [{ type: 'text', text: userPrompt }] }],
-        max_tokens: 2200,
-        thinking: { type: 'between_tools' },
+        max_tokens: 6000,
+        temperature: 0.3,
       }),
     })
 
@@ -287,7 +287,7 @@ async function generateClaudeSections(
   user: ReportRequest,
   chart: ReturnType<typeof buildNatalChart>,
   apiKey: string,
-  timeoutMs = 35000,
+  timeoutMs = 60000,
 ): Promise<StoredSections> {
   const fallback = generateFallbackSections(chart)
   const promptData = buildSectionsPromptData(chart, user.firstName)
@@ -306,11 +306,11 @@ async function generateClaudeSections(
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-5-5',
+        model: 'claude-haiku-4-5-20251001',
         system: SECTIONS_SYSTEM_PROMPT,
         messages: [{ role: 'user', content: [{ type: 'text', text: userPrompt }] }],
-        max_tokens: 2600,
-        thinking: { type: 'between_tools' },
+        max_tokens: 6000,
+        temperature: 0.4,
       }),
     })
 
