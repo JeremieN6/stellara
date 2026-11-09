@@ -147,6 +147,9 @@ utilisateurs, abonnes, et affilies.
 >
 > 2026-11-06 (telemetrie Sassify Ops, branche `feat/ops-telemetry`) : les 4 appels de modeles (Anthropic x3, OpenAI de secours x1, tous en `fetch` brut) envoient leur usage a `pilotage` via `server/utils/opsCost.ts` (copie de `ops/clients/ops-cost.ts`, projet `stellara`) ; etape de notification de deploiement ajoutee a `deploy.yml`. Le processus lit `/etc/stellara/stellara.env` (via `start-stellara.sh`), PAS `.env.local` : `OPS_URL` / `OPS_INGEST_KEY` doivent y etre poses (acces root) apres fusion, avec les secrets GitHub du depot. Le modele `claude-3-5-sonnet-latest` de `generate-report.post.ts` (retire) avait deja ete migre sur `main` vers `claude-sonnet-5-5` (commit cd1bc1d, `temperature` retire, `thinking: between_tools`) pendant cette session : la branche garde cette version. NON TESTE en reel : verifier apres deploiement qu'un rapport genere est bien personnalise (pas le texte de secours). `.env.local` du VPS en 644 (a passer en 600).
 
+>
+> 2026-11-09 (rapport : retour au texte de secours detecte et corrige) : un vrai rapport de test a montre que `claude-sonnet-5-5` renvoyait des reponses coupees pile a `max_tokens` (2200 / 2600 tokens de sortie vus dans `pilotage`) donc JSON invalide et texte de secours silencieux, avec en plus ~42 s de generation pour des delais de 30 / 35 s. Decision du porteur : passer les 2 appels de `generate-report.post.ts` sur `claude-haiku-4-5-20251001` (moins cher, plus rapide), `max_tokens` 6000, delais 60 s, `temperature` 0.3 / 0.4 retablie. Qualite de texte a juger sur un rapport reel. LECON : un appel IA qui retombe sur un texte de secours doit se verifier sur un rapport reel (tokens de sortie == max_tokens = reponse tronquee). Surveiller `claude-haiku-4-5-20251001` : retrait possible depuis le 2026-10-15 selon la page des depreciations.
+
 ---
 
 ## Regle de memoire narrative
