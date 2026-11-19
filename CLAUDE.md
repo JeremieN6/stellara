@@ -26,7 +26,7 @@ utilisateurs, abonnes, et affilies.
 
 ## Etat Actuel du Projet
 **Phase** : Produit en croissance -- migration backend full JS terminee sur le socle, extension des features acquisition/conversion (horoscope, lexique, affiliation, blog) et fiabilisation du deploiement
-**Derniere session** : 2026-10-26
+**Derniere session** : 2026-11-19
 **Progression globale** : 55%
 
 ### Ce qui est fait :
@@ -149,6 +149,8 @@ utilisateurs, abonnes, et affilies.
 
 >
 > 2026-11-09 (rapport : retour au texte de secours detecte et corrige) : un vrai rapport de test a montre que `claude-sonnet-5-5` renvoyait des reponses coupees pile a `max_tokens` (2200 / 2600 tokens de sortie vus dans `pilotage`) donc JSON invalide et texte de secours silencieux, avec en plus ~42 s de generation pour des delais de 30 / 35 s. Decision du porteur : passer les 2 appels de `generate-report.post.ts` sur `claude-haiku-4-5-20251001` (moins cher, plus rapide), `max_tokens` 6000, delais 60 s, `temperature` 0.3 / 0.4 retablie. Qualite de texte a juger sur un rapport reel. LECON : un appel IA qui retombe sur un texte de secours doit se verifier sur un rapport reel (tokens de sortie == max_tokens = reponse tronquee). Surveiller `claude-haiku-4-5-20251001` : retrait possible depuis le 2026-10-15 selon la page des depreciations.
+>
+> 2026-11-19 : Utilisateur signale une erreur 500 en cliquant sur "Débloquer la suite" sur `/rapport` (bouton qui ouvre `GET /api/stripe/create-checkout-session?productType=rapport_complet...` dans un nouvel onglet, `components/ReportDisplay.vue`). `server/api/stripe/create-checkout-session.get.ts` et `server/utils/stripe-client.ts` n'ont pas ete touches par un commit recent -- pas une regression de code, probablement une config serveur manquante/erronee. Diagnostic mene via le MCP Stripe connecte au compte "Stellara" (`acct_1TZdWxISmyrA3fUe`, livemode) sans toucher au code (flux de paiement, pas de correctif a l'aveugle) : (1) compte sain, `charges_enabled`/`payouts_enabled` true, aucune restriction ; (2) les 3 prix attendus existent et sont actifs -- one-shot 9,99€ `price_1TZw55ISmyrA3fUeBjMgyFeC`, mensuel 19€ `price_1TZw55ISmyrA3fUeZJ9gpmaq`, annuel 149€ `price_1TZw53ISmyrA3fUeZbZ5Tope` ; (3) **aucune Checkout Session n'a jamais ete creee par ce code** -- l'unique session dans l'historique Stripe vient d'un Payment Link teste depuis le dashboard (`success_url`/`cancel_url` = `https://stripe.com`, metadata vide), pas de notre `stripe.checkout.sessions.create()`. Conclusion : la requete echoue tres probablement avant d'atteindre l'API Stripe, dans l'un des `createError(500)` du code (cle secrete ou price id manquant/errone en prod) -- confirme en local que ce `statusMessage` remonte tel quel dans le JSON de reponse, meme en `NODE_ENV=production`. Pas d'acces SSH au VPS dans cette session (toujours la meme limitation documentee) : demande a l'utilisateur soit le message exact renvoye par le lien (zero risque, immediat), soit de verifier `STRIPE_SECRET_KEY`/`STRIPE_PRICE_ID*` dans l'env du serveur contre les 3 price id ci-dessus. Reponse utilisateur pas encore recue a la fin de cette session -- rien committe (branche `fix/checkout-session-500` creee depuis `origin/main` a jour, aucune modification de code faite, le hook de rappel memoire s'est declenche sur un `yarn.lock` modifie par `npm ci`, non reel, annule).
 
 ---
 
