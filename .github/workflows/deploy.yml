@@ -45,6 +45,18 @@ jobs:
           grep -n "Lien magique" pages/account.vue || true
           npm ci
           rm -rf .nuxt .output
+
+          # nuxt.config.ts reads several secrets straight from process.env at build
+          # time (STRIPE_SECRET_KEY, STRIPE_PRICE_ID*, ANTHROPIC_API_KEY, etc.) and
+          # bakes them into the compiled runtime config. Source the same env file
+          # start-stellara.sh uses at runtime so the build sees the same values,
+          # otherwise those secrets silently build in as empty strings.
+          if [ -f /etc/stellara/stellara.env ]; then
+            set -a
+            . /etc/stellara/stellara.env
+            set +a
+          fi
+
           npm run build
 
           # Keep wrapper executable when it is managed directly on the VPS.
