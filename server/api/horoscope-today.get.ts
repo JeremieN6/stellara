@@ -296,6 +296,17 @@ async function fetchFromApiNinjas(sign: HoroscopeSign, apiKey: string, baseUrl: 
   })
 
   if (!res.ok) {
+    const errorBody = await res.text().catch(() => '')
+    console.error(`[horoscope] provider error (HTTP ${res.status}):`, errorBody.slice(0, 300))
+
+    const contentNotYetPublished = res.status === 400 && /no horoscope found/i.test(errorBody)
+    if (contentNotYetPublished) {
+      throw createError({
+        statusCode: 503,
+        statusMessage: "L'horoscope du jour n'est pas encore disponible. Réessayez dans quelques instants.",
+      })
+    }
+
     throw createError({
       statusCode: 502,
       statusMessage: `Horoscope provider error (HTTP ${res.status}).`,
